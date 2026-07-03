@@ -9,6 +9,7 @@ const app = express();
 
 const authRoutes = require("./routes/authRoutes");
 const projectRoutes = require("./routes/projectRoutes");
+const reviewRoutes=require("./routes/reviewRoutes");
 
 connectDB();
 
@@ -39,6 +40,7 @@ app.get("/", (req, res) => {
 });
 app.use("/api/auth", authRoutes);
 app.use("/api/projects", projectRoutes);
+app.use("/api/reviews",reviewRoutes);
 
 const PORT = process.env.PORT || 5000;
 
