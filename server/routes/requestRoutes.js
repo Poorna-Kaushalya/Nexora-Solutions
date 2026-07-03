@@ -1,39 +1,23 @@
 const express = require("express");
-
 const router = express.Router();
 
 const {
-
-    createRequest,
-
-    getRequests,
-
-    getRequest,
-
-    updateStatus,
-
-    deleteRequest,
-
+  createRequest,
+  getRequests,
+  getRequest,
+  updateStatus,
+  deleteRequest,
 } = require("../controllers/requestController");
 
-const {
+const { protect, adminOnly } = require("../middleware/authMiddleware");
 
-    protect,
-
-    adminOnly,
-
-} = require("../middleware/authMiddleware");
-
-// Public
+// PUBLIC
 router.post("/", createRequest);
 
-// Admin
+// ADMIN ONLY
 router.get("/", protect, adminOnly, getRequests);
-
 router.get("/:id", protect, adminOnly, getRequest);
-
 router.put("/:id", protect, adminOnly, updateStatus);
-
 router.delete("/:id", protect, adminOnly, deleteRequest);
 
 module.exports = router;

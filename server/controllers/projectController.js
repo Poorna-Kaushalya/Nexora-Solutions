@@ -1,16 +1,40 @@
 const Project = require("../models/Project");
+const cloudinary = require("../config/cloudinary");
+const streamifier = require("streamifier");
 
-// Create Project
+
+// CREATE PROJECT 
 const createProject = async (req, res) => {
   try {
-    const project = await Project.create(req.body);
+    let imageUrl = "";
+
+    if (req.file) {
+      await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { folder: "nexora-projects" },
+          (error, result) => {
+            if (error) return reject(error);
+            imageUrl = result.secure_url;
+            resolve(result);
+          }
+        );
+
+        streamifier.createReadStream(req.file.buffer).pipe(stream);
+      });
+    }
+
+    const project = await Project.create({
+      ...req.body,
+      image: imageUrl,
+    });
 
     res.status(201).json({
       success: true,
-      message: "Project created successfully",
       project,
     });
   } catch (error) {
+    console.log("CREATE PROJECT ERROR:", error);
+
     res.status(500).json({
       success: false,
       message: error.message,
@@ -18,7 +42,9 @@ const createProject = async (req, res) => {
   }
 };
 
-// Get All Projects
+// =========================
+// GET ALL PROJECTS
+// =========================
 const getProjects = async (req, res) => {
   try {
     const projects = await Project.find().sort({ createdAt: -1 });
@@ -36,7 +62,9 @@ const getProjects = async (req, res) => {
   }
 };
 
-// Get Featured Projects
+// =========================
+// GET FEATURED PROJECTS
+// =========================
 const getFeaturedProjects = async (req, res) => {
   try {
     const projects = await Project.find({ featured: true });
@@ -53,7 +81,9 @@ const getFeaturedProjects = async (req, res) => {
   }
 };
 
-// Get Single Project
+// =========================
+// GET SINGLE PROJECT
+// =========================
 const getProject = async (req, res) => {
   try {
     const project = await Project.findById(req.params.id);
@@ -77,7 +107,9 @@ const getProject = async (req, res) => {
   }
 };
 
-// Search Projects
+// =========================
+// SEARCH PROJECTS (FIXED)
+// =========================
 const searchProjects = async (req, res) => {
   try {
     const keyword = req.query.keyword || "";
@@ -86,7 +118,7 @@ const searchProjects = async (req, res) => {
       $or: [
         { title: { $regex: keyword, $options: "i" } },
         { category: { $regex: keyword, $options: "i" } },
-        { technology: { $regex: keyword, $options: "i" } },
+        { description: { $regex: keyword, $options: "i" } }, // FIXED
       ],
     });
 
@@ -102,16 +134,38 @@ const searchProjects = async (req, res) => {
   }
 };
 
-// Update Project
+// =========================
+// UPDATE PROJECT (FIXED for image)
+// =========================
 const updateProject = async (req, res) => {
   try {
+    const updateData = {
+      ...req.body,
+    };
+
+    let imageUrl = "";
+
+    if (req.file) {
+      await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { folder: "nexora-projects" },
+          (error, result) => {
+            if (error) return reject(error);
+            imageUrl = result.secure_url;
+            resolve(result);
+          }
+        );
+
+        streamifier.createReadStream(req.file.buffer).pipe(stream);
+      });
+
+      updateData.image = imageUrl;
+    }
+
     const project = await Project.findByIdAndUpdate(
       req.params.id,
-      req.body,
-      {
-        new: true,
-        runValidators: true,
-      }
+      updateData,
+      { new: true, runValidators: true }
     );
 
     if (!project) {
@@ -127,6 +181,8 @@ const updateProject = async (req, res) => {
       project,
     });
   } catch (error) {
+    console.log("UPDATE ERROR:", error);
+
     res.status(500).json({
       success: false,
       message: error.message,
@@ -134,7 +190,9 @@ const updateProject = async (req, res) => {
   }
 };
 
-// Delete Project
+// =========================
+// DELETE PROJECT
+// =========================
 const deleteProject = async (req, res) => {
   try {
     const project = await Project.findById(req.params.id);
@@ -160,6 +218,9 @@ const deleteProject = async (req, res) => {
   }
 };
 
+// =========================
+// EXPORTS
+// =========================
 module.exports = {
   createProject,
   getProjects,

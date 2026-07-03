@@ -5,11 +5,13 @@ const requestSchema = new mongoose.Schema(
     name: {
       type: String,
       required: true,
+      trim: true,
     },
 
     email: {
       type: String,
       required: true,
+      trim: true,
     },
 
     phone: {
@@ -27,24 +29,8 @@ const requestSchema = new mongoose.Schema(
       required: true,
     },
 
-    category: {
-      type: String,
-      required: true,
-    },
-
-    technology: {
-      type: String,
-      required: true,
-    },
-
     deadline: {
       type: Date,
-      required: true,
-    },
-
-    budget: {
-      type: Number,
-      default: 0,
     },
 
     description: {
@@ -54,19 +40,11 @@ const requestSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: [
-        "Pending",
-        "Accepted",
-        "In Progress",
-        "Completed",
-        "Cancelled",
-      ],
+      enum: ["Pending", "Accepted", "In Progress", "Completed", "Cancelled"],
       default: "Pending",
     },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
 module.exports = mongoose.model("Request", requestSchema);

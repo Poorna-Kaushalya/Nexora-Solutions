@@ -1,47 +1,23 @@
 const express = require("express");
-
 const router = express.Router();
 
 const {
+  createReview,
+  getReviews,
+  getAllReviews,
+  approveReview,
+  deleteReview,
+} = require("../controllers/reviewController");
 
-createReview,
+const { protect, adminOnly } = require("../middleware/authMiddleware");
 
-getReviews,
+// 👤 PUBLIC ROUTES
+router.post("/", createReview);
+router.get("/", getReviews);
 
-getAllReviews,
+// 🛡 ADMIN ROUTES
+router.get("/admin", protect, adminOnly, getAllReviews);
+router.put("/:id/approve", protect, adminOnly, approveReview);
+router.delete("/:id", protect, adminOnly, deleteReview);
 
-approveReview,
-
-deleteReview,
-
-ratingSummary
-
-}=require("../controllers/reviewController");
-
-const {
-
-protect,
-
-adminOnly
-
-}=require("../middleware/authMiddleware");
-
-
-// Public
-
-router.post("/",createReview);
-
-router.get("/",getReviews);
-
-router.get("/summary",ratingSummary);
-
-
-// Admin
-
-router.get("/admin",protect,adminOnly,getAllReviews);
-
-router.put("/:id/approve",protect,adminOnly,approveReview);
-
-router.delete("/:id",protect,adminOnly,deleteReview);
-
-module.exports=router;
+module.exports = router;

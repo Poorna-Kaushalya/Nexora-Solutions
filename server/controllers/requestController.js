@@ -1,226 +1,122 @@
 const Request = require("../models/Request");
 const transporter = require("../config/mail");
 
-// Create Request
+// CREATE REQUEST
 const createRequest = async (req, res) => {
     try {
+        console.log("REQUEST BODY:", req.body);
 
         const request = await Request.create(req.body);
 
-        // Email Notification
-        await transporter.sendMail({
-
-            from: process.env.EMAIL_USER,
-
-            to: process.env.EMAIL_USER,
-
-            subject: "New Project Request",
-
-            html: `
-                <h2>New Project Request</h2>
-
-                <p><strong>Name:</strong> ${request.name}</p>
-
-                <p><strong>Email:</strong> ${request.email}</p>
-
-                <p><strong>Phone:</strong> ${request.phone}</p>
-
-                <p><strong>University:</strong> ${request.university}</p>
-
-                <p><strong>Project:</strong> ${request.projectTitle}</p>
-
-                <p><strong>Technology:</strong> ${request.technology}</p>
-
-                <p><strong>Deadline:</strong> ${request.deadline}</p>
-
-                <p><strong>Budget:</strong> Rs. ${request.budget}</p>
-
-                <p>${request.description}</p>
-
-            `,
-        });
+        try {
+            await transporter.sendMail({
+                from: process.env.EMAIL_USER,
+                to: process.env.EMAIL_USER,
+                subject: "New Project Request",
+                html: `
+          <h2>New Project Request</h2>
+          <p><strong>Name:</strong> ${request.name}</p>
+          <p><strong>Email:</strong> ${request.email}</p>
+          <p><strong>Phone:</strong> ${request.phone}</p>
+          <p><strong>University:</strong> ${request.university}</p>
+          <p><strong>Project:</strong> ${request.projectTitle}</p>
+          <p><strong>Deadline:</strong> ${request.deadline}</p>
+          <p><strong>Description:</strong> ${request.description}</p>
+        `,
+            });
+        } catch (mailError) {
+            console.log("EMAIL ERROR:", mailError.message);
+        }
 
         res.status(201).json({
-
             success: true,
-
-            message: "Project request submitted successfully",
-
+            message: "Request submitted successfully",
             request,
-
         });
 
     } catch (error) {
+        console.log("CREATE REQUEST ERROR:", error);
 
         res.status(500).json({
-
             success: false,
-
             message: error.message,
-
         });
-
     }
 };
 
-// Get All Requests
+// GET ALL
 const getRequests = async (req, res) => {
-
     try {
-
-        const requests = await Request.find().sort({
-
-            createdAt: -1,
-
-        });
+        const requests = await Request.find().sort({ createdAt: -1 });
 
         res.json({
-
             success: true,
-
-            count: requests.length,
-
             requests,
-
         });
 
     } catch (error) {
-
-        res.status(500).json({
-
-            success: false,
-
-            message: error.message,
-
-        });
-
+        res.status(500).json({ success: false, message: error.message });
     }
-
 };
 
-// Get Single Request
+// GET ONE
 const getRequest = async (req, res) => {
-
     try {
-
         const request = await Request.findById(req.params.id);
 
         if (!request) {
-
             return res.status(404).json({
-
                 success: false,
-
                 message: "Request not found",
-
             });
-
         }
 
-        res.json({
-
-            success: true,
-
-            request,
-
-        });
+        res.json({ success: true, request });
 
     } catch (error) {
-
-        res.status(500).json({
-
-            success: false,
-
-            message: error.message,
-
-        });
-
+        res.status(500).json({ success: false, message: error.message });
     }
-
 };
 
-// Update Status
+// UPDATE STATUS
 const updateStatus = async (req, res) => {
-
     try {
-
         const request = await Request.findByIdAndUpdate(
-
             req.params.id,
-
-            {
-                status: req.body.status,
-            },
-
-            {
-                new: true,
-            }
-
+            { status: req.body.status },
+            { new: true }
         );
 
         res.json({
-
             success: true,
-
-            message: "Status Updated",
-
+            message: "Status updated",
             request,
-
         });
 
     } catch (error) {
-
-        res.status(500).json({
-
-            success: false,
-
-            message: error.message,
-
-        });
-
+        res.status(500).json({ success: false, message: error.message });
     }
-
 };
 
-// Delete Request
+// DELETE
 const deleteRequest = async (req, res) => {
-
     try {
-
         await Request.findByIdAndDelete(req.params.id);
 
         res.json({
-
             success: true,
-
-            message: "Request Deleted",
-
+            message: "Request deleted",
         });
 
     } catch (error) {
-
-        res.status(500).json({
-
-            success: false,
-
-            message: error.message,
-
-        });
-
+        res.status(500).json({ success: false, message: error.message });
     }
-
 };
 
 module.exports = {
-
     createRequest,
-
     getRequests,
-
     getRequest,
-
     updateStatus,
-
     deleteRequest,
-
 };

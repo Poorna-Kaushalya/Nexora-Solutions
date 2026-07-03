@@ -1,7 +1,7 @@
 const express = require("express");
-
 const router = express.Router();
 
+const upload = require("../middleware/upload"); 
 const {
   createProject,
   getProjects,
@@ -17,7 +17,9 @@ const {
   adminOnly,
 } = require("../middleware/authMiddleware");
 
-// Public Routes
+// ========================
+// PUBLIC ROUTES
+// ========================
 router.get("/", getProjects);
 
 router.get("/featured", getFeaturedProjects);
@@ -26,11 +28,29 @@ router.get("/search", searchProjects);
 
 router.get("/:id", getProject);
 
-// Admin Routes
-router.post("/", protect, adminOnly, createProject);
+// ========================
+// ADMIN ROUTES (PROTECTED)
+// ========================
 
-router.put("/:id", protect, adminOnly, updateProject);
+// CREATE PROJECT + IMAGE UPLOAD
+router.post(
+  "/",
+  protect,
+  adminOnly,
+  upload.single("image"), 
+  createProject
+);
 
+// UPDATE PROJECT
+router.put(
+  "/:id",
+  protect,
+  adminOnly,
+  upload.single("image"), 
+  updateProject
+);
+
+// DELETE PROJECT
 router.delete("/:id", protect, adminOnly, deleteProject);
 
 module.exports = router;
