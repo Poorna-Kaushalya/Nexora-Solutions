@@ -12,6 +12,7 @@ const projectRoutes = require("./routes/projectRoutes");
 const reviewRoutes=require("./routes/reviewRoutes");
 const serviceRoutes = require("./routes/serviceRoutes");
 const requestRoutes = require("./routes/requestRoutes");
+const dashboardRoutes = require("./routes/dashboardRoutes");
 
 connectDB();
 
@@ -45,6 +46,7 @@ app.use("/api/projects", projectRoutes);
 app.use("/api/reviews",reviewRoutes);
 app.use("/api/services", serviceRoutes);
 app.use("/api/requests", requestRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 
 const PORT = process.env.PORT || 5000;
 
