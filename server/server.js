@@ -10,6 +10,8 @@ const app = express();
 const authRoutes = require("./routes/authRoutes");
 const projectRoutes = require("./routes/projectRoutes");
 const reviewRoutes=require("./routes/reviewRoutes");
+const serviceRoutes = require("./routes/serviceRoutes");
+const requestRoutes = require("./routes/requestRoutes");
 
 connectDB();
 
@@ -41,6 +43,8 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/reviews",reviewRoutes);
+app.use("/api/services", serviceRoutes);
+app.use("/api/requests", requestRoutes);
 
 const PORT = process.env.PORT || 5000;
 
