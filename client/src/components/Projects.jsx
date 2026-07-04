@@ -97,7 +97,7 @@ const Projects = () => {
                     src={p.image}
                     alt={p.title}
                     loading="lazy"
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    className="h-full w-full object-fit transition-transform duration-500 group-hover:scale-105"
                   />
                   {/* Category Pill Tag Overlay */}
                   <span className="absolute top-3 left-3 z-20 rounded-md bg-slate-950/70 px-2 py-1 text-[10px] font-semibold tracking-wider text-slate-300 uppercase backdrop-blur-md border border-slate-800">

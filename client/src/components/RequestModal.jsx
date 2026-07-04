@@ -41,7 +41,7 @@ const RequestModal = ({ open, onClose }) => {
     setIsSubmitting(true);
     try {
       await api.post("/requests", form);
-      toast.success("Project proposal routed successfully! 🚀");
+      toast.success("Project proposal routed successfully!");
 
       setForm({
         name: "",

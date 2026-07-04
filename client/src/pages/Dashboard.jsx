@@ -8,7 +8,7 @@ import { DndContext, closestCenter } from "@dnd-kit/core";
 import { SortableContext, rectSortingStrategy, arrayMove } from "@dnd-kit/sortable";
 import {
   LogOut, FolderGit2, Inbox, Star, Layers, Trash2, CheckCircle,
-  XCircle, Edit3, Save, X, LayoutDashboard, Menu, ChevronLeft, Eye, Calendar, Award
+  XCircle, Edit3, Save, X, LayoutDashboard, Menu, ChevronLeft, Eye, Calendar, Award, Plus
 } from "lucide-react";
 
 import SortableCard from "../components/SortableCard";
@@ -18,18 +18,24 @@ const Dashboard = () => {
 
   // Navigation Sidebar States
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [activeTab, setActiveTab] = useState("overview"); // overview, requests, reviews, projects
+  const [activeTab, setActiveTab] = useState("overview"); // overview, requests, reviews, projects, services
 
   // Data States
   const [stats, setStats] = useState(null);
   const [projects, setProjects] = useState([]);
   const [requests, setRequests] = useState([]);
   const [reviews, setReviews] = useState([]);
+  const [services, setServices] = useState([]);
 
   // Inspection & Modals States
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [edit, setEdit] = useState(null);
   const [deleteId, setDeleteId] = useState(null);
+  
+  // Services Specific Modals
+  const [serviceEdit, setServiceEdit] = useState(null);
+  const [serviceDeleteId, setServiceDeleteId] = useState(null);
+  const [isCreatingService, setIsCreatingService] = useState(false);
 
   const [form, setForm] = useState({
     title: "",
@@ -40,6 +46,13 @@ const Dashboard = () => {
     featured: false,
   });
 
+  const [serviceForm, setServiceForm] = useState({
+    title: "",
+    icon: "",
+    description: "",
+    active: true,
+  });
+
   useEffect(() => {
     fetchData();
     socket.on("refresh-projects", fetchData);
@@ -48,18 +61,19 @@ const Dashboard = () => {
 
   const fetchData = async () => {
     try {
-      const [s, p, r, rv] = await Promise.all([
+      const [s, p, r, rv, sv] = await Promise.all([
         api.get("/dashboard"),
         api.get("/projects"),
         api.get("/requests"),
         api.get("/reviews/admin"),
+        api.get("/services"),
       ]);
 
       setStats(s.data.stats || s.data);
       setProjects(p.data.projects || p.data || []);
       setRequests(r.data.requests || r.data || []);
+      setServices(sv.data.services || sv.data || []);
       
-      // Defensively parse variation structures (Object wrapper vs Raw JSON Array)
       const parsedReviews = rv.data.reviews || rv.data.data || rv.data.feedback || rv.data;
       setReviews(Array.isArray(parsedReviews) ? parsedReviews : []);
     } catch (err) {
@@ -73,6 +87,7 @@ const Dashboard = () => {
     navigate("/");
   };
 
+  /* ================= REQUEST HANDLERS ================= */
   const updateStatus = async (id, currentStatus) => {
     try {
       await api.put(`/requests/${id}`, { status: currentStatus });
@@ -87,17 +102,6 @@ const Dashboard = () => {
     }
   };
 
-  const confirmDelete = async () => {
-    try {
-      await api.delete(`/projects/${deleteId}`);
-      toast.success("Project purged");
-      setDeleteId(null);
-      fetchData();
-    } catch (err) {
-      toast.error("Failed to purge project");
-    }
-  };
-
   const deleteRequest = async (id) => {
     try {
       await api.delete(`/requests/${id}`);
@@ -109,25 +113,15 @@ const Dashboard = () => {
     }
   };
 
-  const approveReview = async (id) => {
+  /* ================= PROJECT HANDLERS ================= */
+  const confirmDelete = async () => {
     try {
-      await api.put(`/reviews/${id}/approve`);
-      toast.success("Review published");
+      await api.delete(`/projects/${deleteId}`);
+      toast.success("Project purged");
+      setDeleteId(null);
       fetchData();
     } catch (err) {
-      toast.error("Failed to approve review");
-    }
-  };
-
-  // Restructured to act as a state toggle instead of immediate absolute deletion
-  const rejectOrDeclineReview = async (id) => {
-    try {
-      // Calls your delete context or custom unapprove fallback configuration route
-      await api.delete(`/reviews/${id}`);
-      toast.success("Review status declined");
-      fetchData();
-    } catch (err) {
-      toast.error("Failed to decline review status");
+      toast.error("Failed to purge project");
     }
   };
 
@@ -157,6 +151,82 @@ const Dashboard = () => {
     setProjects(arrayMove(projects, oldIndex, newIndex));
   };
 
+  /* ================= REVIEW HANDLERS ================= */
+  const approveReview = async (id) => {
+    try {
+      await api.put(`/reviews/${id}/approve`);
+      toast.success("Review published");
+      fetchData();
+    } catch (err) {
+      toast.error("Failed to approve review");
+    }
+  };
+
+  const rejectOrDeclineReview = async (id) => {
+    try {
+      await api.delete(`/reviews/${id}`);
+      toast.success("Review status declined");
+      fetchData();
+    } catch (err) {
+      toast.error("Failed to decline review status");
+    }
+  };
+
+  /* ================= SERVICES CRUD HANDLERS ================= */
+  const openCreateService = () => {
+    setServiceForm({ title: "", icon: "Layers", description: "", active: true });
+    setIsCreatingService(true);
+  };
+
+  const saveCreateService = async () => {
+    try {
+      await api.post("/services", serviceForm);
+      toast.success("Service architecture node initialized");
+      setIsCreatingService(false);
+      fetchData();
+    } catch (err) {
+      toast.error("Failed to create service node");
+    }
+  };
+
+  const openServiceEdit = (s) => {
+    setServiceEdit(s);
+    setServiceForm({ ...s });
+  };
+
+  const saveServiceEdit = async () => {
+    try {
+      await api.put(`/services/${serviceEdit._id}`, serviceForm);
+      toast.success("Service system parameters updated");
+      setServiceEdit(null);
+      fetchData();
+    } catch (err) {
+      toast.error("Failed to update service config");
+    }
+  };
+
+  const confirmDeleteService = async () => {
+    try {
+      await api.delete(`/services/${serviceDeleteId}`);
+      toast.success("Service node completely purged");
+      setServiceDeleteId(null);
+      fetchData();
+    } catch (err) {
+      toast.error("Failed to purge service registry");
+    }
+  };
+
+  const toggleServiceStatus = async (service) => {
+    try {
+      await api.put(`/services/${service._id}`, { active: !service.active });
+      toast.success(`Service status modified`);
+      fetchData();
+    } catch (err) {
+      toast.error("Failed to shift state");
+    }
+  };
+
+  /* ================= UTILS ================= */
   const getStatusStyle = (status) => {
     switch (status) {
       case "Accepted": return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
@@ -167,7 +237,6 @@ const Dashboard = () => {
     }
   };
 
-  // Safe evaluation variables for counter badge tracking pending items
   const pendingCount = reviews.filter(r => !r.approved).length;
 
   if (!stats) {
@@ -183,8 +252,7 @@ const Dashboard = () => {
 
       {/* ================= SIDEBAR MODULE ================= */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex flex-col border-r border-slate-900 bg-slate-950 p-4 transition-all duration-300 ease-in-out ${isSidebarOpen ? "w-64" : "w-20"
-          }`}
+        className={`fixed inset-y-0 left-0 z-50 flex flex-col border-r border-slate-900 bg-slate-950 p-4 transition-all duration-300 ease-in-out ${isSidebarOpen ? "w-64" : "w-20"}`}
       >
         <div className="flex items-center justify-between mb-8 px-2">
           <div className="flex items-center gap-3 overflow-hidden">
@@ -205,6 +273,7 @@ const Dashboard = () => {
           {[
             { id: "overview", label: "Overview Metrics", icon: <LayoutDashboard className="h-4 w-4" /> },
             { id: "projects", label: "Showcase Projects", icon: <FolderGit2 className="h-4 w-4" /> },
+            { id: "services", label: "System Services", icon: <Layers className="h-4 w-4" />, count: services.length },
             { id: "requests", label: "Client Requests", icon: <Inbox className="h-4 w-4" />, count: requests.length },
             { id: "reviews", label: "Review Feeds", icon: <Star className="h-4 w-4" />, count: pendingCount },
           ].map((tab) => (
@@ -223,8 +292,7 @@ const Dashboard = () => {
                 {isSidebarOpen && <span className="whitespace-nowrap">{tab.label}</span>}
               </div>
               {isSidebarOpen && tab.count > 0 && (
-                <span className={`px-2 py-0.5 text-xxs font-bold rounded-full ${activeTab === tab.id ? "bg-white/20 text-white" : "bg-slate-900 border border-slate-800 text-blue-400"
-                  }`}>
+                <span className={`px-2 py-0.5 text-xxs font-bold rounded-full ${activeTab === tab.id ? "bg-white/20 text-white" : "bg-slate-900 border border-slate-800 text-blue-400"}`}>
                   {tab.count}
                 </span>
               )}
@@ -246,7 +314,7 @@ const Dashboard = () => {
       {/* ================= CORE CONTENT RUNTIME PANELS ================= */}
       <main className={`flex-1 transition-all duration-300 p-8 ${isSidebarOpen ? "ml-64" : "ml-20"}`}>
 
-        {/* OVERVIEW DATA METRICS ROUTE MAPS */}
+        {/* OVERVIEW TAB */}
         {activeTab === "overview" && (
           <div className="space-y-6 animate-fade-in">
             <div>
@@ -259,7 +327,7 @@ const Dashboard = () => {
                 ["Projects Matrix", stats.totalProjects || 0, <FolderGit2 className="text-blue-400 h-5 w-5" />],
                 ["Pipeline Requests", stats.totalRequests || 0, <Inbox className="text-amber-400 h-5 w-5" />],
                 ["User Feedback", stats.totalReviews || 0, <Star className="text-purple-400 h-5 w-5" />],
-                ["Active Services", stats.totalServices || 0, <Layers className="text-cyan-400 h-5 w-5" />],
+                ["Active Services", stats.totalServices || services.length, <Layers className="text-cyan-400 h-5 w-5" />],
               ].map(([label, value, icon]) => (
                 <div key={label} className="bg-slate-950 border border-slate-900 p-5 rounded-2xl flex items-center justify-between">
                   <div>
@@ -273,7 +341,7 @@ const Dashboard = () => {
           </div>
         )}
 
-        {/* PROJECT DRAG CANVAS PANEL */}
+        {/* PROJECTS TAB */}
         {activeTab === "projects" && (
           <div className="space-y-4 animate-fade-in">
             <div>
@@ -299,7 +367,87 @@ const Dashboard = () => {
           </div>
         )}
 
-        {/* CLIENT REQUESTS PANEL */}
+        {/* SERVICES MANAGEMENT TAB */}
+        {activeTab === "services" && (
+          <div className="space-y-4 animate-fade-in">
+            <div className="flex justify-between items-center">
+              <div>
+                <h2 className="text-xl font-bold text-white tracking-tight">System Core Services</h2>
+                <p className="text-slate-500 text-xs mt-0.5">Manage modular features and client capabilities.</p>
+              </div>
+              <button 
+                onClick={openCreateService}
+                className="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs px-4 py-2.5 rounded-xl shadow-lg shadow-blue-600/10 transition cursor-pointer"
+              >
+                <Plus className="h-4 w-4" /> Add New Service
+              </button>
+            </div>
+
+            <div className="bg-slate-950 border border-slate-900 rounded-2xl overflow-hidden shadow-xl">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="text-slate-400 bg-slate-900/30 border-b border-slate-900 text-xs font-semibold uppercase tracking-wider">
+                    <tr>
+                      <th className="text-left px-6 py-3.5">Service Details</th>
+                      <th className="text-left px-6 py-3.5">Lucide Icon ID</th>
+                      <th className="px-6 py-3.5 text-center">Lifecycle Flag</th>
+                      <th className="px-6 py-3.5 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-900/60">
+                    {services.length === 0 ? (
+                      <tr>
+                        <td colSpan="4" className="text-center py-8 text-slate-500 text-xs tracking-wider uppercase">
+                          No service configurations registered
+                        </td>
+                      </tr>
+                    ) : (
+                      services.map((s) => (
+                        <tr key={s._id} className="hover:bg-slate-900/10 transition-colors">
+                          <td className="px-6 py-4">
+                            <div className="font-medium text-slate-200">{s.title}</div>
+                            <div className="text-xs text-slate-500 max-w-sm mt-0.5 truncate">{s.description}</div>
+                          </td>
+                          <td className="px-6 py-4 font-mono text-xs text-blue-400">{s.icon || "Layers"}</td>
+                          <td className="px-6 py-4 text-center">
+                            <button
+                              onClick={() => toggleServiceStatus(s)}
+                              className={`text-xs font-medium px-2.5 py-1 rounded-md border cursor-pointer transition ${
+                                s.active 
+                                  ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20" 
+                                  : "bg-slate-800 text-slate-400 border-slate-700 hover:bg-slate-700"
+                              }`}
+                            >
+                              {s.active ? "Active" : "Disabled"}
+                            </button>
+                          </td>
+                          <td className="px-6 py-4 text-right">
+                            <div className="flex items-center justify-end gap-2">
+                              <button
+                                onClick={() => openServiceEdit(s)}
+                                className="p-2 text-slate-400 hover:text-blue-400 border border-transparent hover:border-blue-950/30 hover:bg-blue-950/10 rounded-xl transition cursor-pointer"
+                              >
+                                <Edit3 className="h-4 w-4" />
+                              </button>
+                              <button
+                                onClick={() => setServiceDeleteId(s._id)}
+                                className="p-2 text-slate-500 hover:text-rose-400 border border-transparent hover:border-rose-950/30 hover:bg-rose-950/10 rounded-xl transition cursor-pointer"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* REQUESTS TAB */}
         {activeTab === "requests" && (
           <div className="bg-slate-950 border border-slate-900 rounded-2xl overflow-hidden shadow-xl animate-fade-in">
             <div className="px-6 py-4 border-b border-slate-900">
@@ -374,7 +522,7 @@ const Dashboard = () => {
           </div>
         )}
 
-        {/* FEEDBACK REVIEWS PANEL (Shows ALL reviews, with conditional Toggle functionality) */}
+        {/* REVIEWS TAB */}
         {activeTab === "reviews" && (
           <div className="bg-slate-950 border border-slate-900 rounded-2xl overflow-hidden shadow-xl animate-fade-in">
             <div className="px-6 py-4 border-b border-slate-900 flex justify-between items-center">
@@ -407,16 +555,13 @@ const Dashboard = () => {
                         <td className="px-6 py-4 font-medium text-slate-200">
                           {r.name || r.reviewerName || "Anonymous Node"}
                         </td>
-
                         <td className="px-6 py-4 text-amber-400 text-xs tracking-widest whitespace-nowrap">
                           {"★".repeat(Math.min(5, Math.max(0, Number(r.rating) || 5)))}
                           {"☆".repeat(Math.min(5, Math.max(0, 5 - (Number(r.rating) || 5))))}
                         </td>
-
                         <td className="px-6 py-4 text-slate-300 max-w-sm whitespace-pre-wrap">
                           {r.comment || r.reviewText || r.message || "No content string transmitted."}
                         </td>
-
                         <td className="px-6 py-4 text-center whitespace-nowrap">
                           {r.approved ? (
                             <span className="px-2.5 py-1 text-xs font-medium rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
@@ -428,11 +573,9 @@ const Dashboard = () => {
                             </span>
                           )}
                         </td>
-
                         <td className="px-6 py-4 text-right">
                           <div className="inline-flex items-center gap-2">
                             {!r.approved ? (
-                              /* Shows Approve action trigger if pending */
                               <button
                                 onClick={() => approveReview(r._id)}
                                 className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500 hover:text-white rounded-lg transition cursor-pointer"
@@ -440,7 +583,6 @@ const Dashboard = () => {
                                 <CheckCircle className="h-3.5 w-3.5" /> Approve
                               </button>
                             ) : (
-                              /* Switches seamlessly to Decline action trigger if review is already active */
                               <button
                                 onClick={() => rejectOrDeclineReview(r._id)}
                                 className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium bg-rose-500/10 text-rose-400 border border-rose-500/20 hover:bg-rose-600 hover:text-white rounded-lg transition cursor-pointer"
@@ -460,11 +602,107 @@ const Dashboard = () => {
         )}
       </main>
 
-      {/* ================= DETAILED INSPECT POPUP MODAL ================= */}
+      {/* ================= SERVICE CREATE/EDIT OVERLAY MODAL ================= */}
+      {(isCreatingService || serviceEdit) && (
+        <div className="fixed inset-0 bg-slate-950/80 z-50 flex items-center justify-center p-4 backdrop-blur-xs">
+          <div className="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div className="flex items-center gap-2 text-white">
+                <Layers className="h-4 w-4 text-blue-400" />
+                <h3 className="font-bold text-md">
+                  {isCreatingService ? "Initialize Service Configuration" : "Modify Service Parameter"}
+                </h3>
+              </div>
+              <button 
+                onClick={() => { setIsCreatingService(false); setServiceEdit(null); }} 
+                className="text-slate-500 hover:text-white transition cursor-pointer"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Service Title</label>
+                <input
+                  className="w-full text-sm p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white outline-hidden focus:border-blue-500/50 transition focus:ring-1 focus:ring-blue-500/50"
+                  value={serviceForm.title}
+                  onChange={(e) => setServiceForm({ ...serviceForm, title: e.target.value })}
+                  placeholder="e.g. Enterprise Web Architecture"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Lucide Icon String Identifer</label>
+                <input
+                  className="w-full text-sm p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white font-mono outline-hidden focus:border-blue-500/50 transition focus:ring-1 focus:ring-blue-500/50"
+                  value={serviceForm.icon}
+                  onChange={(e) => setServiceForm({ ...serviceForm, icon: e.target.value })}
+                  placeholder="Layers, Monitor, Code, Globe etc."
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Functional Description</label>
+                <textarea 
+                  rows={3} 
+                  className="w-full text-sm p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white outline-hidden focus:border-blue-500/50 transition focus:ring-1 focus:ring-blue-500/50 resize-none" 
+                  value={serviceForm.description} 
+                  onChange={(e) => setServiceForm({ ...serviceForm, description: e.target.value })} 
+                  placeholder="Provide brief architectural definitions here..."
+                />
+              </div>
+
+              <div className="flex items-center gap-2 pt-1">
+                <input 
+                  type="checkbox"
+                  id="serviceActiveFlag"
+                  checked={serviceForm.active}
+                  onChange={(e) => setServiceForm({ ...serviceForm, active: e.target.checked })}
+                  className="rounded-sm border-slate-800 bg-slate-950 text-blue-600 focus:ring-0 focus:ring-offset-0 h-4 w-4"
+                />
+                <label htmlFor="serviceActiveFlag" className="text-xs font-semibold text-slate-400 select-none cursor-pointer">
+                  Deploy Immediately (Active Lifecycle State)
+                </label>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-2">
+              <button 
+                onClick={() => { setIsCreatingService(false); setServiceEdit(null); }} 
+                className="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white transition cursor-pointer"
+              >
+                Dismiss
+              </button>
+              <button 
+                onClick={isCreatingService ? saveCreateService : saveServiceEdit} 
+                className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 px-4 py-2 text-xs font-semibold text-white transition cursor-pointer"
+              >
+                <Save className="h-3.5 w-3.5" /> Commit Schema
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* SERVICE DELETE CONFIRMATION DIALOG */}
+      {serviceDeleteId && (
+        <div className="fixed inset-0 bg-slate-950/80 z-50 flex items-center justify-center p-4 backdrop-blur-xs">
+          <div className="w-full max-w-sm rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl">
+            <h3 className="text-lg font-bold text-white">Purge Service Node?</h3>
+            <p className="mt-2 text-sm text-slate-400">This removes the service node configuration completely from all customer dashboards.</p>
+            <div className="mt-6 flex justify-end gap-3">
+              <button onClick={() => setServiceDeleteId(null)} className="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white transition cursor-pointer">Cancel</button>
+              <button onClick={confirmDeleteService} className="inline-flex items-center gap-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 px-4 py-2 text-xs font-semibold text-white transition cursor-pointer"><Trash2 className="h-3.5 w-3.5" /> Confirm Purge</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* DETAILED REQUEST INSPECT MODAL */}
       {selectedRequest && (
         <div className="fixed inset-0 bg-slate-950/80 z-50 flex items-center justify-center p-4 backdrop-blur-xs animate-fade-in">
           <div className="w-full max-w-xl rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl relative space-y-6">
-
             <div className="flex justify-between items-start border-b border-slate-800 pb-4">
               <div>
                 <span className="text-xxs font-bold text-blue-500 uppercase tracking-widest bg-blue-500/10 px-2.5 py-1 rounded-md border border-blue-500/20">
@@ -473,10 +711,7 @@ const Dashboard = () => {
                 <h3 className="text-xl font-bold text-white mt-2 tracking-tight">{selectedRequest.projectTitle}</h3>
                 <p className="text-xs text-slate-500 font-mono mt-0.5">ID: {selectedRequest._id}</p>
               </div>
-              <button
-                onClick={() => setSelectedRequest(null)}
-                className="text-slate-500 hover:text-white p-1 rounded-lg border border-transparent hover:border-slate-800 hover:bg-slate-950/50 transition cursor-pointer"
-              >
+              <button onClick={() => setSelectedRequest(null)} className="text-slate-500 hover:text-white p-1 rounded-lg border border-transparent hover:border-slate-800 hover:bg-slate-950/50 transition cursor-pointer">
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -486,7 +721,6 @@ const Dashboard = () => {
                 <span className="block text-xxs font-semibold text-slate-500 uppercase tracking-wider mb-0.5">Client Name</span>
                 <span className="text-slate-200 font-medium">{selectedRequest.name}</span>
               </div>
-
               <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800/60 flex items-center gap-2.5">
                 <Award className="h-4 w-4 text-purple-400 shrink-0" />
                 <div className="overflow-hidden">
@@ -494,17 +728,14 @@ const Dashboard = () => {
                   <span className="text-slate-200 font-medium truncate block">{selectedRequest.university || "Not Documented"}</span>
                 </div>
               </div>
-
               <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800/60">
                 <span className="block text-xxs font-semibold text-slate-500 uppercase tracking-wider mb-0.5">Email Node</span>
                 <a href={`mailto:${selectedRequest.email}`} className="text-blue-400 hover:underline font-medium truncate block">{selectedRequest.email}</a>
               </div>
-
               <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800/60">
                 <span className="block text-xxs font-semibold text-slate-500 uppercase tracking-wider mb-0.5">Phone Reference</span>
                 <span className="text-slate-300 font-mono">{selectedRequest.phone || "N/A"}</span>
               </div>
-
               <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800/60 flex items-center gap-2.5">
                 <Calendar className="h-4 w-4 text-amber-400 shrink-0" />
                 <div>
@@ -514,7 +745,6 @@ const Dashboard = () => {
                   </span>
                 </div>
               </div>
-
               <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800/60">
                 <span className="block text-xxs font-semibold text-slate-500 uppercase tracking-wider mb-0.5">Workflow Lifecycle State</span>
                 <div className="mt-1">
@@ -544,12 +774,11 @@ const Dashboard = () => {
               <span>Ingested: {selectedRequest.createdAt ? new Date(selectedRequest.createdAt).toLocaleString() : "N/A"}</span>
               <span>Updated: {selectedRequest.updatedAt ? new Date(selectedRequest.updatedAt).toLocaleString() : "N/A"}</span>
             </div>
-
           </div>
         </div>
       )}
 
-      {/* DELETE DIALOG MODAL */}
+      {/* PROJECT DELETE MODAL */}
       {deleteId && (
         <div className="fixed inset-0 bg-slate-950/80 z-50 flex items-center justify-center p-4 backdrop-blur-xs">
           <div className="w-full max-w-sm rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl">
@@ -563,7 +792,7 @@ const Dashboard = () => {
         </div>
       )}
 
-      {/* EDIT CONFIGURATION SCHEMA OVERLAY */}
+      {/* PROJECT EDIT MODAL */}
       {edit && (
         <div className="fixed inset-0 bg-slate-950/80 z-50 flex items-center justify-center p-4 backdrop-blur-xs">
           <div className="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl space-y-4">

@@ -4,22 +4,24 @@ const serviceSchema = new mongoose.Schema(
   {
     title: {
       type: String,
-      required: true,
+      required: [true, "Service title is required"],
+      trim: true,
+      index: true, // Optimized for search indexes
     },
-
     icon: {
       type: String,
-      default: "",
+      default: "Layers", // Fallback default lucide icon string identifier
+      trim: true,
     },
-
     description: {
       type: String,
-      required: true,
+      required: [true, "Description is required"],
+      trim: true,
     },
-
     active: {
       type: Boolean,
       default: true,
+      index: true,
     },
   },
   {
