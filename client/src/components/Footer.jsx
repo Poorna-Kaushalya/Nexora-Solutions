@@ -1,5 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Layers, ArrowUpRight, Sparkles, Code2, MessageSquare, ShieldCheck, HelpCircle } from "lucide-react";
+import logo from "../assets/logos.png";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -9,7 +10,7 @@ const Footer = () => {
   // Reusable Smooth Scroll Handler for Anchor Links
   const handleScrollToSection = (e, sectionId) => {
     e.preventDefault();
-    
+
     if (location.pathname !== "/") {
       // If user is on an admin/policy subpage, route home first, then target the anchor element
       navigate("/");
@@ -25,25 +26,25 @@ const Footer = () => {
   return (
     <footer className="relative border-t border-slate-900 bg-slate-950 px-6 pt-16 pb-8 text-slate-400 sm:px-12 lg:px-24">
       <div className="mx-auto max-w-7xl">
-        
+
         {/* Main Grid Segment */}
         <div className="grid gap-10 md:grid-cols-4 lg:gap-16">
-          
+
           {/* Brand Info Column */}
           <div className="md:col-span-2 space-y-4">
             <Link to="/" className="flex items-center gap-4 text-xl font-bold text-white">
               <div className="flex h-12 w-12 items-center justify-center rounded-3xl bg-linear-to-br from-blue-500 to-indigo-600 shadow-[0_0_15px_rgba(59,130,246,0.2)]">
-                <img 
-                src="/logos.png" 
-                alt="Nexora Solutions Logo" 
-                className="h-full w-full object-contain p-0" 
-              />
+                <img
+                  src={logo}
+                  alt="Nexora Solutions Logo"
+                  className="h-full w-full object-contain p-0"
+                />
               </div>
               <span className="bg-linear-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
                 Nexora <span className="text-blue-400 font-medium text-xs tracking-wider uppercase">Solutions</span>
               </span>
             </Link>
-            
+
             <p className="max-w-sm text-sm leading-relaxed text-slate-500">
               Architecting next-generation digital frameworks. Engineered for scale, speed, and absolute delivery velocity.
             </p>
@@ -58,8 +59,8 @@ const Footer = () => {
             <h4 className="text-xs font-semibold uppercase tracking-wider text-white">Platform</h4>
             <ul className="mt-4 space-y-3 text-sm">
               <li>
-                <a 
-                  href="#services" 
+                <a
+                  href="#services"
                   onClick={(e) => handleScrollToSection(e, "services")}
                   className="group flex items-center gap-2 transition-colors duration-200 hover:text-white"
                 >
@@ -68,8 +69,8 @@ const Footer = () => {
                 </a>
               </li>
               <li>
-                <a 
-                  href="#projects" 
+                <a
+                  href="#projects"
                   onClick={(e) => handleScrollToSection(e, "projects")}
                   className="group flex items-center gap-2 transition-colors duration-200 hover:text-white"
                 >
@@ -78,8 +79,8 @@ const Footer = () => {
                 </a>
               </li>
               <li>
-                <a 
-                  href="#testimonials" 
+                <a
+                  href="#testimonials"
                   onClick={(e) => handleScrollToSection(e, "testimonials")}
                   className="group flex items-center gap-2 transition-colors duration-200 hover:text-white"
                 >
@@ -119,7 +120,7 @@ const Footer = () => {
 
         {/* Structural Horizontal Divider */}
         <div className="mt-12 border-t border-slate-900 pt-8 flex flex-col items-center justify-between gap-4 sm:flex-row">
-          
+
           {/* Copyright String */}
           <p className="text-xs text-slate-600 order-2 sm:order-1">
             © {currentYear} Nexora Solutions. All rights reserved. Built with precision.
@@ -127,14 +128,14 @@ const Footer = () => {
 
           {/* Modern Social Vector Nodes */}
           <div className="flex items-center gap-3 order-1 sm:order-2">
-            
+
             {/* Inline X / Twitter SVG */}
             <a href="#" className="rounded-xl border border-slate-900 bg-slate-950 p-2.5 text-slate-500 hover:border-slate-800 hover:bg-slate-900/50 hover:text-white transition-all duration-300">
               <svg className="h-4 w-4 fill-current" viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
               </svg>
             </a>
-            
+
             {/* Inline GitHub SVG */}
             <a href="#" className="rounded-xl border border-slate-900 bg-slate-950 p-2.5 text-slate-500 hover:border-slate-800 hover:bg-slate-900/50 hover:text-white transition-all duration-300">
               <svg className="h-4 w-4 fill-current" viewBox="0 0 24 24" aria-hidden="true">

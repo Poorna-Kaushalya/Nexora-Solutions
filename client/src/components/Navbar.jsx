@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Layers, ArrowUpRight, ShieldCheck, Home, Code2, Lock, Mail, X, Sparkles, MessageSquare, Menu } from "lucide-react";
 import api from "../api/axios";
 import toast from "react-hot-toast";
+import logo from "../assets/logos.png";
 
 const Navbar = ({ onRequestClick }) => {
   const location = useLocation();
@@ -35,7 +36,7 @@ const Navbar = ({ onRequestClick }) => {
   const handleScrollToSection = (e, sectionId) => {
     e.preventDefault();
     setMobileMenuOpen(false);
-    
+
     if (location.pathname !== "/") {
       navigate("/");
       setTimeout(() => {
@@ -55,7 +56,7 @@ const Navbar = ({ onRequestClick }) => {
       const res = await api.post("/auth/login", form);
       localStorage.setItem("token", res.data.token);
       toast.success("Login Successful! Redirecting to Dashboard...");
-      
+
       setShowLoginModal(false);
       setForm({ email: "", password: "" });
       navigate("/dashboard");
@@ -78,19 +79,19 @@ const Navbar = ({ onRequestClick }) => {
     <>
       <nav className="fixed top-0 left-0 right-0 z-50 w-full border-b border-slate-900/80 bg-slate-950/70 backdrop-blur-md transition-all duration-300">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 sm:px-12 lg:px-24">
-          
+
           {/* Brand Logo Container */}
           {/* Brand Logo Container */}
-          <Link 
-            to="/" 
+          <Link
+            to="/"
             className="group flex items-center gap-2.5 text-lg font-bold tracking-tight text-white transition"
             onClick={() => setMobileMenuOpen(false)}
           >
             <div className="flex h-9 w-9 items-center justify-center rounded-3xl bg-slate-900/50 border border-slate-800 shadow-[0_0_15px_rgba(59,130,246,0.1)] transition-transform duration-300 group-hover:scale-105 group-hover:border-blue-500/30 overflow-hidden">
-              <img 
-                src="/logos.png" 
-                alt="Nexora Solutions Logo" 
-                className="h-full w-full object-contain p-0" 
+              <img
+                src={logo}
+                alt="Nexora Solutions Logo"
+                className="h-full w-full object-contain p-0"
               />
             </div>
             <span className="bg-linear-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
@@ -107,9 +108,8 @@ const Navbar = ({ onRequestClick }) => {
                   <Link
                     key={link.label}
                     to={link.to}
-                    className={`group relative flex items-center gap-1.5 rounded-lg px-3 py-2 transition-colors duration-300 hover:text-white ${
-                      isActive(link.to) ? "text-white bg-slate-900/50" : ""
-                    }`}
+                    className={`group relative flex items-center gap-1.5 rounded-lg px-3 py-2 transition-colors duration-300 hover:text-white ${isActive(link.to) ? "text-white bg-slate-900/50" : ""
+                      }`}
                   >
                     <Icon className="h-4 w-4" />
                     <span>{link.label}</span>
@@ -133,9 +133,8 @@ const Navbar = ({ onRequestClick }) => {
             <Link
               to="/admin"
               onClick={handleAdminClick}
-              className={`group relative flex items-center gap-1.5 rounded-lg px-3 py-2 transition-colors duration-300 hover:text-white ${
-                isActive("/admin") || showLoginModal ? "text-white bg-slate-900/50" : ""
-              }`}
+              className={`group relative flex items-center gap-1.5 rounded-lg px-3 py-2 transition-colors duration-300 hover:text-white ${isActive("/admin") || showLoginModal ? "text-white bg-slate-900/50" : ""
+                }`}
             >
               <ShieldCheck className="h-4 w-4" />
               <span>Admin</span>
@@ -174,9 +173,8 @@ const Navbar = ({ onRequestClick }) => {
                       key={link.label}
                       to={link.to}
                       onClick={() => setMobileMenuOpen(false)}
-                      className={`flex items-center gap-2.5 rounded-xl p-3 transition ${
-                        isActive(link.to) ? "text-white bg-slate-900/60" : "hover:text-white hover:bg-slate-900/30"
-                      }`}
+                      className={`flex items-center gap-2.5 rounded-xl p-3 transition ${isActive(link.to) ? "text-white bg-slate-900/60" : "hover:text-white hover:bg-slate-900/30"
+                        }`}
                     >
                       <Icon className="h-4 w-4" />
                       {link.label}
@@ -199,9 +197,8 @@ const Navbar = ({ onRequestClick }) => {
               <Link
                 to="/admin"
                 onClick={handleAdminClick}
-                className={`flex items-center gap-2.5 rounded-xl p-3 transition ${
-                  showLoginModal ? "text-white bg-slate-900/60" : "hover:text-white hover:bg-slate-900/30"
-                }`}
+                className={`flex items-center gap-2.5 rounded-xl p-3 transition ${showLoginModal ? "text-white bg-slate-900/60" : "hover:text-white hover:bg-slate-900/30"
+                  }`}
               >
                 <ShieldCheck className="h-4 w-4" />
                 Admin Panel
@@ -226,17 +223,17 @@ const Navbar = ({ onRequestClick }) => {
 
       {/* MODAL POPUP CARD LOGIN SYSTEM */}
       {showLoginModal && (
-        <div 
+        <div
           className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm"
           onClick={() => setShowLoginModal(false)}
         >
-          <div 
+          <div
             className="relative w-full max-w-md overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 p-8 shadow-2xl text-slate-100 animate-in fade-in zoom-in-95 duration-200"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="absolute -top-10 -right-10 -z-10 h-32 w-32 rounded-full bg-blue-600/10 blur-xl pointer-events-none" />
 
-            <button 
+            <button
               onClick={() => setShowLoginModal(false)}
               className="absolute top-4 right-4 text-slate-500 hover:text-white transition-colors duration-200 cursor-pointer"
             >
@@ -256,8 +253,8 @@ const Navbar = ({ onRequestClick }) => {
                 <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400">Email Address</label>
                 <div className="relative mt-1.5">
                   <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
-                  <input 
-                    type="email" 
+                  <input
+                    type="email"
                     name="email"
                     required
                     value={form.email}
@@ -272,8 +269,8 @@ const Navbar = ({ onRequestClick }) => {
                 <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400">Password</label>
                 <div className="relative mt-1.5">
                   <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
-                  <input 
-                    type="password" 
+                  <input
+                    type="password"
                     name="password"
                     required
                     value={form.password}
