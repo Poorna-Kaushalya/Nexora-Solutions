@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Layers, ArrowUpRight, ShieldCheck, Home, Code2, Lock, Mail, X, Sparkles, MessageSquare, Menu } from "lucide-react";
 import api from "../api/axios";
 import toast from "react-hot-toast";
-import logo from "../assets/logos.png";
+import logo from "../assets/logoss.png";
 
 const Navbar = ({ onRequestClick }) => {
   const location = useLocation();
@@ -87,7 +87,7 @@ const Navbar = ({ onRequestClick }) => {
             className="group flex items-center gap-2.5 text-lg font-bold tracking-tight text-white transition"
             onClick={() => setMobileMenuOpen(false)}
           >
-            <div className="flex h-9 w-9 items-center justify-center rounded-3xl bg-slate-900/50 border border-slate-800 shadow-[0_0_15px_rgba(59,130,246,0.1)] transition-transform duration-300 group-hover:scale-105 group-hover:border-blue-500/30 overflow-hidden">
+            <div className="flex h-12 w-12 items-center justify-center rounded-3xl bg-slate-900/50 border border-slate-800 shadow-[0_0_15px_rgba(59,130,246,0.1)] transition-transform duration-300 group-hover:scale-105 group-hover:border-blue-500/30 overflow-hidden">
               <img
                 src={logo}
                 alt="Nexora Solutions Logo"

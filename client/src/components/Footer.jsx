@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Layers, ArrowUpRight, Sparkles, Code2, MessageSquare, ShieldCheck, HelpCircle } from "lucide-react";
-import logo from "../assets/logos.png";
+import logo from "../assets/logoss.png";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -32,16 +32,16 @@ const Footer = () => {
 
           {/* Brand Info Column */}
           <div className="md:col-span-2 space-y-4">
-            <Link to="/" className="flex items-center gap-4 text-xl font-bold text-white">
-              <div className="flex h-12 w-12 items-center justify-center rounded-3xl bg-linear-to-br from-blue-500 to-indigo-600 shadow-[0_0_15px_rgba(59,130,246,0.2)]">
+            <Link to="/" className="flex items-center gap-4 text-2xl font-bold text-white">
+              <div className="flex h-24 w-24 items-center justify-center">
                 <img
                   src={logo}
                   alt="Nexora Solutions Logo"
                   className="h-full w-full object-contain p-0"
                 />
               </div>
-              <span className="bg-linear-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
-                Nexora <span className="text-blue-400 font-medium text-xs tracking-wider uppercase">Solutions</span>
+              <span className="bg-linear-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent uppercase">
+                Nexora <br/><span className="text-blue-400 font-medium text-xs tracking-wider uppercase absolute mt-1">Solutions</span>
               </span>
             </Link>
 
