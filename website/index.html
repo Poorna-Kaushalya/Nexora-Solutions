@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexora Solutions - Concept to Code</title>
+
+    <!-- Logo / Favicon Configuration -->
+    <link rel="icon" type="image/png" href="images/logoss.png">
+    <link rel="shortcut icon" type="image/png" href="images/logoss.png">
+
+    <!-- Tailwind CSS v4 -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+    <!-- React, ReactDOM, and Babel -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Framer Motion & Lucide Icons Scripts -->
+    <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        @keyframes marqueeLeft {
+            0% {
+                transform: translateX(0%);
+            }
+
+            100% {
+                transform: translateX(-50%);
+            }
+        }
+
+        @keyframes marqueeRight {
+            0% {
+                transform: translateX(-50%);
+            }
+
+            100% {
+                transform: translateX(0%);
+            }
+        }
+
+        .animate-marquee-left {
+            display: flex;
+            width: max-content;
+            animation: marqueeLeft 55s linear infinite;
+        }
+
+        .animate-marquee-right {
+            display: flex;
+            width: max-content;
+            animation: marqueeRight 55s linear infinite;
+        }
+
+        .marquee-container:hover .animate-marquee-left,
+        .marquee-container:hover .animate-marquee-right {
+            animation-play-state: paused;
+        }
+
+        /* Perspective style for card flipping */
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+    </style>
+</head>
+
+<body
+    class="bg-slate-950 text-slate-100 antialiased overflow-x-hidden selection:bg-blue-500/30 selection:text-blue-200">
+
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+        const { motion, AnimatePresence, useMotionValue, useMotionTemplate } = window.Motion;
+
+        // Custom Lucide Icon Wrapper Component
+        const Icon = ({ name, className }) => {
+            const iconRef = useRef(null);
+            useEffect(() => {
+                if (window.lucide && iconRef.current) {
+                    window.lucide.createIcons({
+                        attrs: { class: className },
+                        nameAttr: 'data-lucide'
+                    });
+                }
+            }, [name, className]);
+            return <i ref={iconRef} data-lucide={name}></i>;
+        };
+
+        // --- NAVBAR COMPONENT ---
+        const Navbar = ({ onRequestClick }) => {
+            const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+            const handleScrollToSection = (e, sectionId) => {
+                e.preventDefault();
+                setMobileMenuOpen(false);
+                document.getElementById(sectionId)?.scrollIntoView({ behavior: "smooth" });
+            };
+
+            return (
+                <>
+                    <nav className="fixed top-0 left-0 right-0 z-50 w-full border-b border-slate-900/80 bg-slate-950/70 backdrop-blur-md transition-all duration-300">
+                        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 sm:px-12 lg:px-24">
+                            <a href="#" className="group flex items-center gap-2.5 text-lg font-bold tracking-tight text-white transition">
+                                <div className="flex h-12 w-12 items-center justify-center rounded-3xl bg-slate-900/50 border border-slate-800 shadow-[0_0_15px_rgba(59,130,246,0.1)] transition-transform duration-300 group-hover:scale-105 group-hover:border-blue-500/30 overflow-hidden">
+                                    <img src="images/logoss.png" alt="Nexora Solutions Logo" className="h-full w-full object-contain p-0" />
+                                </div>
+                                <span className="bg-linear-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
+                                    Nexora <span className="text-blue-400 font-medium text-sm tracking-wide">Solutions</span>
+                                </span>
+                            </a>
+
+                            <div className="hidden md:flex items-center gap-1 text-sm font-medium text-slate-400">
+                                <a href="#" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="group relative flex items-center gap-1.5 rounded-lg px-3 py-2 transition-colors duration-300 hover:text-white">
+                                    <Icon name="home" className="h-4 w-4" /> <span>Home</span>
+                                </a>
+                                <a href="#services" onClick={(e) => handleScrollToSection(e, "services")} className="group relative flex items-center gap-1.5 rounded-lg px-3 py-2 transition-colors duration-300 hover:text-white">
+                                    <Icon name="sparkles" className="h-4 w-4" /> <span>Services</span>
+                                </a>
+                                <a href="#projects" onClick={(e) => handleScrollToSection(e, "projects")} className="group relative flex items-center gap-1.5 rounded-lg px-3 py-2 transition-colors duration-300 hover:text-white">
+                                    <Icon name="code-2" className="h-4 w-4" /> <span>Projects</span>
+                                </a>
+                                <a href="#testimonials" onClick={(e) => handleScrollToSection(e, "testimonials")} className="group relative flex items-center gap-1.5 rounded-lg px-3 py-2 transition-colors duration-300 hover:text-white">
+                                    <Icon name="message-square" className="h-4 w-4" /> <span>Testimonials</span>
+                                </a>
+
+                                <span className="mx-2 h-4 w-px bg-slate-800" />
+                                <button onClick={onRequestClick} className="group inline-flex items-center gap-1.5 rounded-full border border-blue-500/30 bg-blue-500/10 px-4 py-2 text-xs font-semibold tracking-wide text-blue-400 uppercase backdrop-blur-sm transition-all duration-300 hover:border-blue-400/50 hover:bg-blue-500 hover:text-white hover:shadow-[0_0_20px_rgba(59,130,246,0.2)] active:scale-95 cursor-pointer">
+                                    Quick Connect <Icon name="arrow-up-right" className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                                </button>
+                            </div>
+
+                            <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-800 bg-slate-900/50 text-slate-400 transition hover:text-white md:hidden cursor-pointer">
+                                {mobileMenuOpen ? <Icon name="x" className="h-5 w-5" /> : <Icon name="menu" className="h-5 w-5" />}
+                            </button>
+                        </div>
+
+                        {mobileMenuOpen && (
+                            <div className="border-t border-slate-900 bg-slate-950/95 p-6 backdrop-blur-xl md:hidden">
+                                <div className="flex flex-col gap-3 text-sm font-medium text-slate-400">
+                                    <a href="#" onClick={(e) => { e.preventDefault(); setMobileMenuOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="flex items-center gap-2.5 rounded-xl p-3 transition hover:text-white hover:bg-slate-900/30">
+                                        <Icon name="home" className="h-4 w-4" /> Home
+                                    </a>
+                                    <a href="#services" onClick={(e) => handleScrollToSection(e, "services")} className="flex items-center gap-2.5 rounded-xl p-3 transition hover:text-white hover:bg-slate-900/30">
+                                        <Icon name="sparkles" className="h-4 w-4" /> Services
+                                    </a>
+                                    <a href="#projects" onClick={(e) => handleScrollToSection(e, "projects")} className="flex items-center gap-2.5 rounded-xl p-3 transition hover:text-white hover:bg-slate-900/30">
+                                        <Icon name="code-2" className="h-4 w-4" /> Projects
+                                    </a>
+                                    <a href="#testimonials" onClick={(e) => handleScrollToSection(e, "testimonials")} className="flex items-center gap-2.5 rounded-xl p-3 transition hover:text-white hover:bg-slate-900/30">
+                                        <Icon name="message-square" className="h-4 w-4" /> Testimonials
+                                    </a>
+                                    <div className="mt-2 h-px w-full bg-slate-900" />
+                                    <button onClick={() => { setMobileMenuOpen(false); onRequestClick(); }} className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 text-xs font-bold tracking-wider text-white uppercase shadow-lg shadow-blue-600/10 cursor-pointer">
+                                        Quick Connect <Icon name="arrow-up-right" className="h-4 w-4" />
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </nav>
+                </>
+            );
+        };
+
+        // --- HERO COMPONENT WITH MARQUEE LOGO STREAMS ---
+        const Hero = () => {
+            const mouseX = useMotionValue(0);
+            const mouseY = useMotionValue(0);
+
+            useEffect(() => {
+                const handleMouseMove = (e) => {
+                    mouseX.set(e.clientX);
+                    mouseY.set(e.clientY);
+                };
+                window.addEventListener("mousemove", handleMouseMove);
+                return () => window.removeEventListener("mousemove", handleMouseMove);
+            }, [mouseX, mouseY]);
+
+            const laserBeams = [
+                { left: "10%", delay: 0.2, duration: 3.5, height: "h-32" },
+                { left: "25%", delay: 1.5, duration: 4.5, height: "h-56" },
+                { left: "40%", delay: 0.8, duration: 3.0, height: "h-48" },
+                { left: "60%", delay: 2.2, duration: 5.0, height: "h-64" },
+                { left: "75%", delay: 0.4, duration: 4.0, height: "h-40" },
+                { left: "90%", delay: 1.8, duration: 4.8, height: "h-60" },
+            ];
+
+            const transactionItems = [
+                { title: "Secure Escrow Pipeline", icon: "shield-check", desc: "Automated cryptographic logic protection." },
+                { title: "IP Ownership Transfer", icon: "key-round", desc: "Instant automated credentials release." },
+                { title: "Micro-payment Gateway", icon: "credit-card", desc: "Distributed international clearing rails." },
+                { title: "Real-time Auditing", icon: "receipt", desc: "Transparent build milestone tracking." },
+                { title: "Continuous CI/CD Delivery", icon: "git-branch", desc: "Automated test suites and builds live." },
+                { title: "Distributed Database Mesh", icon: "database", desc: "Multi-region fallback and cloud sync." },
+                { title: "End-to-End Encryption", icon: "lock", desc: "Data payload security verification." },
+                { title: "Predictive Analytics Engine", icon: "cpu", desc: "Automated deep learning performance logs." }
+            ];
+
+            const tailoringServices = [
+                { title: "Full Stack Development Services", description: "End-to-end development of final-year and academic projects, supporting web, mobile, AI, IoT, and cloud-based systems with full source code delivery.", icon: "graduation-cap" },
+                { title: "Web Application Development", description: "Design and development of modern, responsive, and high-performance web applications tailored to client needs with clean UI.", icon: "monitor" },
+                { title: "Mobile App Development", description: "Development of Android and cross-platform mobile applications with intuitive UI design and smooth user experience.", icon: "smartphone" },
+                { title: "UI/UX & Frontend Design", description: "Creation of modern, responsive, and visually appealing user interfaces with a strong focus on user experience.", icon: "palette" },
+                { title: "Database & Backend Systems", description: "Design and implementation of efficient database systems and backend architectures to support scalable applications.", icon: "database" },
+                { title: "Cloud Deployment & Hosting", description: "Deployment and hosting of web applications on modern cloud platforms such as Vercel, Netlify, Render, and AWS.", icon: "cloud-lightning" }
+            ];
+
+            // Duplicate logic to ensure continuous loop filling
+            const doubleTransactions = [...transactionItems, ...transactionItems, ...transactionItems, ...transactionItems];
+            const doubleServices = [...tailoringServices, ...tailoringServices, ...tailoringServices];
+
+            return (
+                <section className="relative flex flex-col min-h-[100vh] items-center justify-center overflow-hidden bg-slate-950 px-6 pt-32 pb-20 text-white sm:px-12 lg:px-24">
+                    <motion.div className="pointer-events-none absolute inset-0 z-10 opacity-40 mix-blend-screen transition-opacity duration-500" style={{ background: useMotionTemplate`radial-gradient(550px circle at ${mouseX}px ${mouseY}px, rgba(14, 165, 233, 0.12), transparent 80%)` }} />
+                    <div className="absolute inset-0 z-0 bg-[linear-gradient(to_right,#0f172a_1px,transparent_1px),linear-gradient(to_bottom,#0f172a_1px,transparent_1px)] bg-[size:3.5rem_3.5rem] [mask-image:radial-gradient(ellipse_70%_60%_at_50%_35%,#000_60%,transparent_100%)] opacity-70" />
+
+                    <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
+                        {laserBeams.map((beam, index) => (
+                            <motion.div key={index} className={`absolute top-0 w-[1.5px] bg-linear-to-b from-transparent via-cyan-500/40 to-transparent ${beam.height}`} style={{ left: beam.left }} animate={{ y: ["-100%", "250%"], opacity: [0, 1, 1, 0] }} transition={{ duration: beam.duration, repeat: Infinity, delay: beam.delay, ease: "linear" }}>
+                                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1.5 h-6 bg-cyan-400 blur-[1px] rounded-full shadow-[0_0_12px_rgba(34,211,238,0.8)]" />
+                            </motion.div>
+                        ))}
+                    </div>
+
+                    <div className="relative z-10 mx-auto max-w-5xl text-center mb-16">
+                        {/* Modified: top to bottom entrance animation */}
+                        <motion.div initial={{ opacity: 0, y: -40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: "easeOut" }} className="inline-flex items-center gap-2 rounded-full border border-slate-800/80 bg-slate-900/40 p-1.5 pr-4 text-[11px] font-mono tracking-wider backdrop-blur-xl">
+                            <div className="flex h-5 items-center gap-1.5 rounded-full bg-linear-to-r from-blue-500 to-indigo-600 px-2.5 text-[10px] font-bold text-white shadow-[0_0_10px_rgba(59,130,246,0.3)]">
+                                <Icon name="layers" className="h-3 w-3" /> CUSTOM SOFTWARE
+                            </div>
+                            <span className="flex items-center gap-1.5 text-slate-400">
+                                <Icon name="activity" className="h-3 w-3 text-emerald-400 animate-pulse" /> Production Pipelines Live
+                            </span>
+                        </motion.div>
+
+                        {/* Modified: top to bottom entrance animation */}
+                        <motion.h1 initial={{ opacity: 0, y: -50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.1, ease: "easeOut" }} className="mt-8 text-4xl font-extrabold tracking-tight sm:text-6xl md:text-7xl lg:text-8xl select-none leading-[1.05]">
+                            <span className="block bg-linear-to-b from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">Concept to Code.</span>
+                            <span className="mt-1 block bg-linear-to-r from-cyan-400 via-blue-500 to-indigo-400 bg-clip-text text-transparent drop-shadow-[0_2px_30px_rgba(56,189,248,0.15)] font-black">Nexora Solutions</span>
+                        </motion.h1>
+
+                        {/* Modified: top to bottom entrance animation */}
+                        <motion.p initial={{ opacity: 0, y: -30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }} className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-slate-400 font-normal">
+                            Submit your product requirements directly through our deployment pipeline. Monitor our currently active software clusters, review codebase evolution, and scale your technical infrastructure seamlessly.
+                        </motion.p>
+
+                        {/* Modified: top to bottom entrance animation */}
+                        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.6, ease: "easeOut" }} className="mt-8 flex justify-center">
+                            <a
+                                href="https://wa.me/94753933586"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="group flex items-center gap-2.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-6 py-3.5 text-sm font-semibold tracking-wide text-emerald-400 backdrop-blur-sm transition-all duration-300 hover:border-emerald-400/50 hover:bg-emerald-600 hover:text-white hover:shadow-[0_0_25px_rgba(16,185,129,0.3)] active:scale-95 cursor-pointer"
+                            >
+                                <svg className="h-4 w-4 fill-current transition-transform duration-300 group-hover:scale-110" viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"></path>
+                                </svg>
+                                <span>Initiate WhatsApp Stream</span>
+                            </a>
+                        </motion.div>
+                    </div>
+
+                    {/* --- MARQUEE WORKSPACE STREAMS --- */}
+                    <div className="w-full max-w-[100vw] marquee-container relative z-20">
+                        <div className="w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,white_5%,white_85%,transparent)]">
+                            <div className="animate-marquee-right gap-6">
+                                {doubleTransactions.map((item, idx) => (
+                                    <div key={idx} className="flex items-center gap-4 bg-slate-900/40 border border-slate-800/80 px-6 py-4 rounded-xl min-w-[280px] backdrop-blur-sm">
+                                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-400">
+                                            <Icon name={item.icon} className="h-5 w-5" />
+                                        </div>
+                                        <div>
+                                            <h4 className="text-sm font-bold text-white tracking-wide">{item.title}</h4>
+                                            <p className="text-[12px] text-slate-500 mt-0.5">{item.desc}</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            );
+        };
+
+        // --- STATS COUNTER COMPONENT ---
+        const StatsCounter = () => (
+            <div className="mx-auto max-w-5xl px-6 -py-12 grid grid-cols-2 md:grid-cols-4 gap-6 text-center border-y border-slate-900/50 my-12">
+                {[["20+", "Active Builds"], ["99.8%", "Uptime Rate"], ["24h", "Avg Response"], ["100%", "IP Ownership"]].map(([stat, label], i) => (
+                    <div key={i}>
+                        <div className="text-2xl md:text-3xl font-extrabold text-blue-400">{stat}</div>
+                        <div className="text-xl text-slate-500 mt-1 font-mono uppercase tracking-wider">{label}</div>
+                    </div>
+                ))}
+            </div>
+        );
+
+        // --- SERVICES COMPONENT ---
+        const Services = () => {
+            const tailoringServices = [
+                { _id: "ts_1", title: "Full Stack Development Services", description: "End-to-end development of final-year and academic projects, including system planning, UI/UX design, frontend and backend development, database integration, deployment, and complete documentation. Supports web, mobile, AI, IoT, and cloud-based systems with full source code delivery.", icon: "graduation-cap" },
+                { _id: "ts_2", title: "Web Application Development", description: "Design and development of modern, responsive, and high-performance web applications tailored to client needs. This includes frontend development, backend integration, database connectivity, API consumption, authentication systems, and full-stack implementation. Focus is on scalable architecture, clean UI, and optimized user experience across all devices.", icon: "monitor" },
+                { _id: "ts_3", title: "Mobile App Development", description: "Development of Android and cross-platform mobile applications with intuitive UI design and smooth user experience. Includes integration with backend APIs, authentication systems, real-time features, push notifications, and database connectivity. Applications are optimized for performance, usability, and scalability.", icon: "smartphone" },
+                { _id: "ts_4", title: "UI/UX & Frontend Design", description: "Creation of modern, responsive, and visually appealing user interfaces with a strong focus on user experience. Includes layout design, component structuring, responsive design principles, accessibility improvements, and seamless integration with backend systems for dynamic content rendering.", icon: "palette" },
+                { _id: "ts_5", title: "Database & Backend Systems", description: "Design and implementation of efficient database systems and backend architectures to support scalable applications. Includes schema design, CRUD operations, indexing, query optimization, API development, authentication, and secure data handling for both relational and non-relational databases.", icon: "database" },
+                { _id: "ts_6", title: "Cloud Deployment & Hosting", description: "Deployment and hosting of web applications on modern cloud platforms such as Vercel, Netlify, Render, Railway, Firebase, and AWS. This service includes application deployment, domain setup, environment configuration, backend hosting, database connection, CI/CD pipeline integration, and production optimization to ensure the system runs smoothly, securely, and efficiently online.", icon: "cloud-lightning" }
+            ];
+
+            return (
+                <section id="services" className="relative overflow-hidden bg-slate-950 py-24 px-6 text-slate-100 sm:px-12 lg:px-24">
+                    <div className="absolute top-1/4 left-1/4 -z-10 h-[500px] w-[500px] rounded-full bg-blue-600/5 blur-[140px] pointer-events-none" />
+                    <div className="mx-auto max-w-7xl">
+                        <div className="mb-20 text-center">
+                            <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/20 bg-blue-500/5 px-4 py-1.5 text-xs font-medium tracking-wide text-blue-400 backdrop-blur-md">
+                                <Icon name="sparkles" className="h-3.5 w-3.5" /> Capabilities
+                            </div>
+                            <h2 className="mt-4 bg-linear-to-b from-white via-slate-200 to-slate-400 bg-clip-text text-4xl font-extrabold tracking-tight text-transparent sm:text-5xl">
+                                Tailored Expert Solutions
+                            </h2>
+                            <div className="mx-auto mt-4 h-[1px] w-12 bg-linear-to-r from-transparent via-blue-500/50 to-transparent" />
+                        </div>
+
+                        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 items-stretch perspective-1000">
+                            {tailoringServices.map((s, index) => (
+                                /* Modified: Added top-to-bottom viewport entrance and flip animation on hover */
+                                <motion.div
+                                    key={s._id}
+                                    initial={{ opacity: 0, y: -40 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true, margin: "-100px" }}
+                                    transition={{ duration: 0.6, delay: index * 0.1, ease: "easeOut" }}
+                                    whileHover={{ rotateY: 10, rotateX: 5, y: -6 }}
+                                    className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-900 bg-slate-900/20 p-8 backdrop-blur-md transition-all duration-500 min-h-[290px] cursor-default"
+                                >
+                                    <div className="absolute inset-0 -z-20 bg-[linear-gradient(to_right,#0f172a_1px,transparent_1px),linear-gradient(to_bottom,#0f172a_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-20" />
+                                    <div>
+                                        <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-slate-900/60 ring-1 ring-slate-900 border border-slate-800/50 text-blue-400 transition-all duration-500 group-hover:scale-105 group-hover:text-blue-300 group-hover:border-blue-500/30">
+                                            <Icon name={s.icon} className="h-5 w-5" />
+                                        </div>
+                                        <h3 className="mt-6 text-lg font-bold tracking-tight text-slate-100 group-hover:text-white">
+                                            {s.title}
+                                        </h3>
+                                        <p className="mt-3 text-xs sm:text-sm leading-relaxed text-slate-400 text-justify group-hover:text-slate-300">
+                                            {s.description}
+                                        </p>
+                                    </div>
+                                </motion.div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+            );
+        };
+
+        // --- TECH STACK COMPONENT ---
+        const TechStack = () => {
+            const stackCategories = [
+                {
+                    title: "Frontend Engines",
+                    tools: [
+                        { name: "React", slug: "react", color: "61DAFB" },
+                        { name: "Next.js", slug: "nextdotjs", color: "FFFFFF" },
+                        { name: "JavaScript", slug: "javascript", color: "F7DF1E" },
+                        { name: "Kotlin", slug: "kotlin", color: "7F52FF" },
+                        { name: "Tailwind CSS", slug: "tailwindcss", color: "38BDF8" }
+                    ],
+                },
+                {
+                    title: "Backend & Storage",
+                    tools: [
+                        { name: "Node.js", slug: "nodedotjs", color: "5FA04E" },
+                        { name: "Python", slug: "python", color: "3776AB" },
+                        { name: "MongoDB", slug: "mongodb", color: "47A248" },
+                        { name: "PostgreSQL", slug: "postgresql", color: "4169E1" },
+                        { name: "Firebase", slug: "firebase", color: "DD2C00" }
+                    ],
+                },
+                {
+                    title: "AI, ML & Hardware",
+                    tools: [
+                        { name: "TensorFlow", slug: "tensorflow", color: "FF6F00" },
+                        { name: "ESP32 (IoT)", slug: "espressif", color: "E7352C" },
+                        { name: "Jupyter Notebook", slug: "jupyter", color: "F37626" },
+                        {
+                            name: "Power BI",
+                            slug: "power-bi",
+                            color: "F2C811",
+                            customSvg: (
+                                <svg viewBox="0 0 24 24" className="h-8 w-8 shrink-0" fill="#F2C811">
+                                    <path d="M11.25 0h3.375v24H11.25zM16.875 7.875H20.25V24h-3.375zM5.625 13.5H9V24H5.625z" />
+                                </svg>
+                            )
+                        }
+                    ],
+                },
+            ];
+
+            return (
+                <section className="mx-auto max-w-7xl px-6 sm:px-12 lg:px-24 py-20">
+                    <div className="mb-16 flex flex-col items-center text-center max-w-3xl mx-auto">
+                        <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/20 bg-blue-500/5 px-4 py-1.5 text-xs font-medium tracking-wide text-blue-400 backdrop-blur-md">
+                            <Icon name="terminal" className="h-3.5 w-3.5" /> Capabilities
+                        </div>
+                        <h2 className="mt-4 bg-linear-to-b from-white via-slate-200 to-slate-400 bg-clip-text text-3xl font-extrabold tracking-tight text-transparent sm:text-4xl">
+                            Engineered With Modern Stacks
+                        </h2>
+                        <div className="mt-3 h-[1px] w-12 bg-linear-to-r from-transparent via-blue-500/50 to-transparent" />
+                    </div>
+
+                    <div className="space-y-12">
+                        {stackCategories.map((cat, i) => (
+                            <div key={i} className="space-y-4">
+                                <div className="flex items-center gap-3">
+                                    <span className="text-sm font-bold font-mono tracking-widest text-blue-500/80 uppercase">
+                                        {cat.title}
+                                    </span>
+                                    <div className="h-[2px] flex-1 bg-slate-900/80" />
+                                </div>
+
+                                <div className="grid gap-10 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 perspective-1000">
+                                    {cat.tools.map((tool, index) => (
+                                        /* Modified: Added top-to-bottom viewport entrance and flip animation on hover */
+                                        <motion.div
+                                            key={index}
+                                            initial={{ opacity: 0, y: -30 }}
+                                            whileInView={{ opacity: 1, y: 0 }}
+                                            viewport={{ once: true }}
+                                            transition={{ duration: 0.5, delay: index * 0.05, ease: "easeOut" }}
+                                            whileHover={{ rotateY: -15, rotateX: 5, y: -4 }}
+                                            className="group relative flex flex-col items-center justify-center rounded-xl border border-slate-900 bg-slate-950/40 p-4 text-center backdrop-blur-md transition-all duration-500"
+                                            style={{
+                                                "--hover-border": `#${tool.color}35`
+                                            }}
+                                        >
+                                            <div
+                                                className="absolute inset-0 -z-10 rounded-xl opacity-0 blur-2xl transition-opacity duration-500 group-hover:opacity-10 pointer-events-none"
+                                                style={{ backgroundColor: `#${tool.color}` }}
+                                            />
+
+                                            <div className="absolute inset-0 rounded-xl border border-transparent transition-all duration-500 group-hover:border-solid group-hover:border group-hover:border-[var(--hover-border)] pointer-events-none" />
+
+                                            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-900/30 border border-slate-900/80 p-3.5 transition-all duration-500 group-hover:bg-slate-900/10 group-hover:border-slate-800">
+                                                {tool.customSvg ? (
+                                                    <div className="transition-transform duration-500 ease-out group-hover:scale-110 group-hover:rotate-[2deg]">
+                                                        {tool.customSvg}
+                                                    </div>
+                                                ) : (
+                                                    <img
+                                                        src={`https://cdn.simpleicons.org/${tool.slug}/${tool.color}`}
+                                                        alt={`${tool.name} icon`}
+                                                        className="h-8 w-8 shrink-0 transition-transform duration-500 ease-out group-hover:scale-110 group-hover:rotate-[2deg]"
+                                                        loading="lazy"
+                                                    />
+                                                )}
+                                            </div>
+
+                                            <span className="mt-1 text-sm font-semibold tracking-wide text-slate-400 transition-colors duration-300 group-hover:text-white">
+                                                {tool.name}
+                                            </span>
+                                        </motion.div>
+                                    ))}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+            );
+        };
+
+        // --- PROJECTS COMPONENT ---
+        const Projects = () => {
+            const staticProjects = [
+                { title: "KneeCare", category: "AI / IoT", technology: "Python, TensorFlow, React, ESP32", description: "Multi-modal AI system for knee osteoarthritis detection using wearable sensors and deep learning.", image: "images/project-1.png", github: "https://github.com/Poorna-Kaushalya/KneeCare" },
+                { title: "Smart Hostel IoT System", category: "IoT", technology: "JavaScript, Firebase, ESP32", description: "Built a smart hostel environmental monitoring system.", image: "images/project-2.png", github: "https://github.com/Poorna-Kaushalya/smart-hostel-iot-system" },
+                { title: "Class Management System", category: "Web App", technology: "React, Node.js, MongoDB", description: "MERN stack system for managing students, courses, and academic workflows.", image: "images/project-3.png", github: "https://github.com/Poorna-Kaushalya/Class-Management-System" },
+                { title: "Heart Disease Prediction", category: "ML", technology: "Python, Machine Learning", description: "ML model to predict heart disease risk using clinical data.", image: "images/project-4.png", github: "https://github.com/Poorna-Kaushalya/Heart-Disease-Prediction" },
+                { title: "Automobile Loan Default Prediction", category: "Data Science", technology: "Python, Data Science", description: "Predicts loan default risk using applicant data.", image: "images/project-5.png", github: "https://github.com/Poorna-Kaushalya/Automobile-Loan-Default-Prediction-System" },
+                { title: "Retail BI Project", category: "BI", technology: "Power BI, Data Warehouse", description: "Retail analytics dashboard for business insights.", image: "images/project-6.png", github: "https://github.com/Poorna-Kaushalya/Retail-Transactional-Data-Warehouse-BI-Project" },
+                { title: "IBM HR Analytics Dashboard", category: "BI / HR", technology: "Power BI", description: "HR analytics dashboard for employee attrition analysis.", image: "images/project-7.png", github: "https://github.com/Poorna-Kaushalya/IBM-HR-Analytics-Employee-Attrition-Performance-Dashboard" },
+                { title: "Stock Price Prediction", category: "ML", technology: "Python, Time Series", description: "Stock forecasting using time series analysis.", image: "images/project-8.png", github: "https://github.com/Poorna-Kaushalya/Stock-Price-Prediction-using-Time-Series-Analysis" },
+                { title: "Online Bus Reservation System", category: "Web App", technology: "PHP", description: "Bus ticket booking system with reservation workflow.", image: "images/project-9.png", github: "https://github.com/Poorna-Kaushalya/Online-Bus-Reservation-System" },
+                { title: "Pet Healthcare System", category: "Web App", technology: "JavaScript", description: "Pet healthcare management platform.", image: "images/project-10.png", github: "https://github.com/Poorna-Kaushalya/Pet-Healthcare-And-Accessories-System" },
+                { title: "School Management System", category: "Java", technology: "Java OOP", description: "School management system for students and teachers.", image: "images/project-11.png", github: "https://github.com/Poorna-Kaushalya/Online-School-Information-Management-System" },
+                { title: "Kotlin Note App", category: "Mobile App", technology: "Kotlin, Android", description: "Simple Android note-taking app.", image: "images/project-12.png", github: "https://github.com/Poorna-Kaushalya/Build-Note-App-Using-Kotlin" }
+            ];
+
+            return (
+                <section id="projects" className="relative overflow-hidden bg-slate-950 py-24 px-6 text-slate-100 sm:px-12 lg:px-24">
+                    <div className="mx-auto max-w-7xl">
+                        <div className="mb-16 text-center">
+                            <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/30 bg-blue-500/10 px-4 py-1.5 text-xs font-medium tracking-wide text-blue-400 backdrop-blur-sm">
+                                <Icon name="folder-git-2" className="h-3.5 w-3.5" /> Showcase
+                            </div>
+                            <h2 className="mt-4 bg-linear-to-b from-white via-slate-200 to-slate-500 bg-clip-text text-4xl font-extrabold tracking-tight text-transparent sm:text-5xl">
+                                Featured Projects
+                            </h2>
+                        </div>
+
+                        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 perspective-1000">
+                            {staticProjects.map((p, idx) => (
+                                /* Modified: Added top-to-bottom entrance drop and flip interaction styling */
+                                <motion.div
+                                    key={idx}
+                                    initial={{ opacity: 0, y: -50 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true, margin: "-50px" }}
+                                    transition={{ duration: 0.6, delay: (idx % 4) * 0.1, ease: "easeOut" }}
+                                    whileHover={{ rotateY: 8, rotateX: 4, y: -6 }}
+                                    className="group relative flex flex-col overflow-hidden rounded-2xl border border-slate-900 bg-slate-900/40 backdrop-blur-sm transition-all duration-300"
+                                >
+                                    <div className="relative h-44 overflow-hidden bg-slate-950">
+                                        <img src={p.image} alt={p.title} className="h-full w-full transition-transform duration-500 group-hover:scale-105" onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=400&auto=format&fit=crop' }} />
+                                        <span className="absolute top-3 left-3 z-20 rounded-md bg-slate-950/70 px-2 py-1 text-[10px] font-semibold tracking-wider text-slate-300 uppercase border border-slate-800">
+                                            {p.category}
+                                        </span>
+                                    </div>
+                                    <div className="flex flex-1 flex-col justify-between p-5">
+                                        <div>
+                                            <div className="flex items-start justify-between gap-2">
+                                                <h3 className="font-bold text-base tracking-tight text-white group-hover:text-blue-400">{p.title}</h3>
+                                                <a href={p.github} target="_blank" rel="noopener noreferrer" className="text-slate-500 hover:text-blue-400 transition-colors duration-200">
+                                                    <Icon name="github" className="h-4 w-4" />
+                                                </a>
+                                            </div>
+                                            <p className="mt-2 text-xs leading-relaxed text-slate-400">{p.description}</p>
+                                        </div>
+                                        <div className="mt-4 pt-3 border-t border-slate-800/60 flex flex-wrap gap-1.5">
+                                            {p.technology.split(', ').map((tech, tIdx) => (
+                                                <span key={tIdx} className="inline-flex items-center rounded-md bg-blue-500/5 px-2 py-0.5 text-[10px] font-medium text-blue-400 ring-1 ring-inset ring-blue-500/10">
+                                                    {tech}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+            );
+        };
+
+        // --- REVIEWS COMPONENT ---
+        const Reviews = () => {
+            const staticReviews = [
+                {
+                    _id: "1",
+                    name: "Kasun Perera",
+                    comment: "Outstanding work on the deep learning pipeline and IoT hardware integration. The code was exceptionally clean, and the detailed system architecture documentation made our final defense panel presentation smooth sailing.",
+                    rating: 5
+                },
+                {
+                    _id: "2",
+                    name: "Dilini Silva",
+                    comment: "Nexora helped us structure a highly scalable backend with complex MongoDB aggregation pipelines. The source files were delivered well ahead of schedule, completely satisfying our assignment criteria.",
+                    rating: 4
+                },
+                {
+                    _id: "3",
+                    name: "Sahan Jayawardena",
+                    comment: "Excellent experience working with them. The data preprocessing workflows and machine learning models were flawlessly structured, and the interactive dashboard execution went well beyond our project expectations.",
+                    rating: 4.5
+                }
+            ];
+
+            return (
+                <section id="testimonials" className="relative overflow-hidden bg-slate-950 py-10 px-6 text-slate-100 sm:px-12 lg:px-24">
+                    <div className="mx-auto max-w-7xl text-center">
+                        <div className="mb-10 flex flex-col items-center text-center max-w-3xl mx-auto">
+                            <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/30 bg-blue-500/10 px-4 py-1.5 text-xs font-medium tracking-wide text-blue-400">
+                                <Icon name="message-square" className="h-3.5 w-3.5" /> Testimonials
+                            </div>
+                            <h2 className="mt-4 bg-linear-to-b from-white via-slate-200 to-slate-500 bg-clip-text text-3xl font-extrabold tracking-tight text-transparent sm:text-4xl">
+                                Trusted By Innovators
+                            </h2>
+                        </div>
+
+                        <div className="grid gap-6 md:grid-cols-3 max-w-6xl mx-auto perspective-1000">
+                            {staticReviews.map((r) => {
+                                const fullStars = Math.floor(r.rating);
+                                const hasHalfStar = r.rating % 1 !== 0;
+                                const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+
+                                return (
+                                    <motion.div
+                                        key={r._id}
+                                        initial={{ opacity: 0, y: -40 }}
+                                        whileInView={{ opacity: 1, y: 0 }}
+                                        viewport={{ once: true }}
+                                        transition={{ duration: 0.6, ease: "easeOut" }}
+                                        whileHover={{ rotateY: -6, rotateX: 3, y: -4 }}
+                                        className="flex flex-col justify-between rounded-2xl border border-slate-900 bg-slate-900/40 p-6 backdrop-blur-sm transition-all duration-300 text-left"
+                                    >
+                                        <div>
+                                            {/* Render star ratings dynamically in vibrant yellow */}
+                                            <div className="flex gap-1 mb-4 text-yellow-400">
+                                                {/* Full Stars */}
+                                                {[...Array(fullStars)].map((_, i) => (
+                                                    <Icon key={`full-${i}`} name="star" className="h-4 w-4 fill-current" />
+                                                ))}
+
+                                                {/* Half Star */}
+                                                {hasHalfStar && (
+                                                    <Icon name="star-half" className="h-4 w-4 fill-current" />
+                                                )}
+
+                                                {/* Empty Stars */}
+                                                {[...Array(emptyStars)].map((_, i) => (
+                                                    <Icon key={`empty-${i}`} name="star" className="h-4 w-4 text-slate-600" />
+                                                ))}
+                                            </div>
+                                            <p className="text-sm leading-relaxed text-slate-300">"{r.comment}"</p>
+                                        </div>
+                                        <div className="mt-5 pt-3.5 border-t border-slate-900/60">
+                                            <h3 className="text-xs font-bold tracking-wide text-white">{r.name}</h3>
+                                        </div>
+                                    </motion.div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </section>
+            );
+        };
+
+        // --- WHATSAPP BUTTON COMPONENT ---
+        const WhatsAppButton = () => {
+            return (
+                <a
+                    href="https://wa.me/94753933586"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="fixed bottom-5 right-5 z-50 bg-green-500 text-white p-4 rounded-full shadow-lg hover:scale-110 transition flex items-center justify-center"
+                    aria-label="WhatsApp Contact"
+                >
+                    <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 448 512" height="24" width="24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"></path>
+                    </svg>
+                </a>
+            );
+        };
+
+        // --- CONNECT MODAL ---
+        const RequestModal = ({ open, onClose }) => {
+            return (
+                <AnimatePresence>
+                    {open && (
+                        /* Modified: Wrapped in AnimatePresence with top to bottom entrance dropdown animation */
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-slate-950/80 backdrop-blur-sm"
+                            onClick={onClose}
+                        >
+                            <motion.div
+                                initial={{ opacity: 0, y: -70 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -70 }}
+                                transition={{ type: "spring", damping: 25, stiffness: 250 }}
+                                className="bg-slate-900 border border-slate-800 max-w-md w-full rounded-2xl p-8 relative shadow-2xl text-center"
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                <button onClick={onClose} className="absolute top-4 right-4 text-slate-500 hover:text-white cursor-pointer"><Icon name="x" className="h-4 w-4" /></button>
+
+                                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl border border-blue-500/20 bg-blue-500/5 text-blue-400">
+                                    <Icon name="zap" className="h-6 w-6" />
+                                </div>
+
+                                <h3 className="text-xl font-bold text-white mb-2">Connect to Build Stream</h3>
+                                <p className="text-xs text-slate-400 mb-6">Skip the queues. Choose a direct communication link to share your functional parameters and system requirements instantly.</p>
+
+                                <div className="space-y-3">
+                                    <a
+                                        href="https://wa.me/94753933586"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex items-center justify-center gap-2.5 w-full bg-green-600 hover:bg-green-500 text-white font-semibold py-3 rounded-xl text-sm transition-all shadow-lg shadow-green-600/10 cursor-pointer active:scale-98"
+                                    >
+                                        <Icon name="phone" className="h-4 w-4" /> Message on WhatsApp
+                                    </a>
+                                    <a
+                                        href="mailto:pkshor1@gmail.com?subject=Project%20Build%20Stream%20Initiation"
+                                        className="flex items-center justify-center gap-2.5 w-full bg-slate-800 hover:bg-slate-700 text-slate-100 border border-slate-700 font-semibold py-3 rounded-xl text-sm transition-all cursor-pointer active:scale-98"
+                                    >
+                                        <Icon name="mail" className="h-4 w-4" /> Open Email Stream
+                                    </a>
+                                </div>
+                            </motion.div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            );
+        };
+
+        // --- FAQ COMPONENT ---
+        const FAQ = () => {
+            const [openIndex, setOpenIndex] = useState(null);
+
+            const faqs = [
+                {
+                    q: "Who owns the intellectual property and code of the completed project?",
+                    a: "You retain 100% full ownership of the source code, research documents, and implementation assets. Everything we construct is handed over to you as a clean, production-ready system to support your final submission or presentation."
+                },
+                {
+                    q: "How fast will I receive a reply after submitting a project request?",
+                    a: "We understand deadlines are critical. Our core engineering and research teams review your project guidelines immediately, providing a comprehensive structural response, timeline evaluation, and feasibility breakdown within 12 to 24 hours."
+                },
+                {
+                    q: "Can you assist with complex research documentation and system architecture?",
+                    a: "Yes, absolutely. We bridge the gap between technical execution and detailed reporting. We assist in mapping out complex architectures, configuring deep learning networks, data analytics, and providing clean technical explanations for your methodology chapters."
+                },
+                {
+                    q: "Can your team step in to fix a broken project or incomplete code?",
+                    a: "Yes. If your project has failing test suites, unoptimized algorithms, or outdated libraries, our team can audit the existing repository, refactor the codebase, and align it with your project requirements perfectly."
+                }
+            ];
+
+            return (
+                <section id="faq" className="mx-auto max-w-4xl px-6 py-16 scroll-mt-20">
+                    <div className="mb-10 flex flex-col items-center text-center">
+                        <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/30 bg-blue-500/10 px-4 py-1.5 text-xs font-medium tracking-wide text-blue-400 backdrop-blur-sm">
+                            <Icon name="help-circle" className="h-3.5 w-3.5" /> FAQ
+                        </div>
+                        <h2 className="mt-4 bg-linear-to-b from-white via-slate-200 to-slate-500 bg-clip-text text-2xl font-extrabold tracking-tight text-transparent sm:text-3xl">
+                            Project & Research Support FAQ
+                        </h2>
+                        <div className="mt-3 h-[1px] w-12 bg-linear-to-r from-transparent via-blue-500/50 to-transparent" />
+                    </div>
+
+                    <div className="space-y-3">
+                        {faqs.map((faq, idx) => {
+                            const isOpen = openIndex === idx;
+                            return (
+                                <div key={idx} className="rounded-xl border border-slate-900 bg-slate-900/20 overflow-hidden transition-all duration-300 hover:border-slate-800/80">
+                                    <button
+                                        onClick={() => setOpenIndex(isOpen ? null : idx)}
+                                        className="flex w-full items-center justify-between p-5 text-left text-sm font-semibold text-slate-200 cursor-pointer transition-colors duration-300 hover:text-white"
+                                    >
+                                        <span className="pr-4">{faq.q}</span>
+                                        <Icon name="chevron-down" className={`h-4 w-4 shrink-0 text-slate-500 transition-transform duration-300 ${isOpen ? "rotate-180 text-blue-400" : ""}`} />
+                                    </button>
+                                    <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isOpen ? "max-h-56 border-t border-slate-900/60" : "max-h-0"}`}>
+                                        <p className="p-5 text-xs sm:text-sm text-slate-400 leading-relaxed bg-slate-950/40">
+                                            {faq.a}
+                                        </p>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </section>
+            );
+        };
+
+        // --- FOOTER COMPONENT ---
+        const Footer = () => {
+            const currentYear = new Date().getFullYear();
+
+            const handleScrollToSection = (e, sectionId) => {
+                e.preventDefault();
+                document.getElementById(sectionId)?.scrollIntoView({ behavior: "smooth" });
+            };
+
+            return (
+                <footer className="relative border-t border-slate-900 bg-slate-950 px-6 pt-16 pb-8 text-slate-400 sm:px-12 lg:px-24">
+                    <div className="mx-auto max-w-7xl">
+                        <div className="grid gap-10 md:grid-cols-4 lg:gap-16">
+                            <div className="md:col-span-2 space-y-4">
+                                <a href="#" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="flex items-center gap-4 text-2xl font-bold text-white">
+                                    <div className="flex h-20 w-20 items-center justify-center rounded-2xl overflow-hidden">
+                                        <img src="images/logoss.png" alt="Nexora Solutions Logo" className="h-full w-full object-contain p-0" />
+                                    </div>
+                                    <span className="bg-linear-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent uppercase text-lg tracking-tight">
+                                        Nexora <br /><span className="text-blue-400 font-medium text-xs tracking-wider uppercase">Solutions</span>
+                                    </span>
+                                </a>
+                                <p className="max-w-sm text-sm leading-relaxed text-slate-500">
+                                    Architecting next-generation digital frameworks. Engineered for scale, speed, and absolute delivery velocity.
+                                </p>
+                                <div className="flex items-center gap-2 text-xs font-medium text-slate-600">
+                                    <span>Build</span><span>•</span><span>Learn</span><span>•</span><span>Succeed</span>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h4 className="text-xs font-semibold uppercase tracking-wider text-white">Platform</h4>
+                                <ul className="mt-4 space-y-3 text-sm">
+                                    <li>
+                                        <a href="#services" onClick={(e) => handleScrollToSection(e, "services")} className="group flex items-center gap-2 transition-colors duration-200 hover:text-white">
+                                            <Icon name="sparkles" className="h-3.5 w-3.5 text-slate-500 group-hover:text-blue-400 transition-colors" />
+                                            <span>Services</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#projects" onClick={(e) => handleScrollToSection(e, "projects")} className="group flex items-center gap-2 transition-colors duration-200 hover:text-white">
+                                            <Icon name="code-2" className="h-3.5 w-3.5 text-slate-500 group-hover:text-blue-400 transition-colors" />
+                                            <span>Projects</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#testimonials" onClick={(e) => handleScrollToSection(e, "testimonials")} className="group flex items-center gap-2 transition-colors duration-200 hover:text-white">
+                                            <Icon name="message-square" className="h-3.5 w-3.5 text-slate-500 group-hover:text-blue-400 transition-colors" />
+                                            <span>Testimonials</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <div>
+                                <h4 className="text-xs font-semibold uppercase tracking-wider text-white">System</h4>
+                                <ul className="mt-4 space-y-3 text-sm">
+                                    <li>
+                                        <a href="#faq" onClick={(e) => handleScrollToSection(e, "faq")} className="group flex items-center gap-2 transition-colors duration-200 hover:text-white">
+                                            <Icon name="help-circle" className="h-3.5 w-3.5 text-slate-500 group-hover:text-indigo-400 transition-colors" />
+                                            <span>Support Center</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <span className="group flex items-center gap-2 text-slate-600 cursor-not-allowed">
+                                            <Icon name="shield-check" className="h-3.5 w-3.5 text-slate-700" />
+                                            <span>Terms & Privacy</span>
+                                        </span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div className="mt-12 border-t border-slate-900 pt-8 flex flex-col items-center justify-between gap-4 sm:flex-row">
+                            <p className="text-xs text-slate-600 order-2 sm:order-1">
+                                © {currentYear} Nexora Solutions. All rights reserved. Built with precision.
+                            </p>
+                            <div className="flex items-center gap-3 order-1 sm:order-2">
+                                <a href="#" className="rounded-xl border border-slate-900 bg-slate-950 p-2.5 text-slate-500 hover:border-slate-800 hover:bg-slate-900/50 hover:text-white transition-all duration-300">
+                                    <svg className="h-4 w-4 fill-current" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" /></svg>
+                                </a>
+                                <a href="#" className="rounded-xl border border-slate-900 bg-slate-950 p-2.5 text-slate-500 hover:border-slate-800 hover:bg-slate-900/50 hover:text-white transition-all duration-300">
+                                    <svg className="h-4 w-4 fill-current" viewBox="0 0 24 24" aria-hidden="true"><path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clipRule="evenodd" /></svg>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </footer>
+            );
+        };
+
+        // --- MAIN ROOT CONTAINER (HOME) ---
+        const Home = () => {
+            const [openRequest, setOpenRequest] = useState(false);
+            return (
+                <div className="relative min-h-screen bg-slate-950 text-slate-100 overflow-x-hidden">
+                    <Navbar onRequestClick={() => setOpenRequest(true)} />
+                    <Hero />
+                    <StatsCounter />
+                    <Services />
+                    <TechStack />
+                    <Projects />
+                    <Reviews />
+                    <FAQ />
+                    <WhatsAppButton />
+                    <Footer />
+                    <RequestModal open={openRequest} onClose={() => setOpenRequest(false)} />
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<Home />);
+    </script>
+</body>
+
+</html>
